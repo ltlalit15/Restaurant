@@ -160,3 +160,45 @@ export const healthAPI = {
     return response.json();
   }
 };
+
+export const staffAPI = {
+  getAll: async () => {
+    const response = await fetch(`${API_BASE_URL}/api/staff`, {
+      headers: DEFAULT_HEADERS
+    });
+    return response.json();
+  },
+
+  getById: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/api/staff/${id}`, {
+      headers: DEFAULT_HEADERS
+    });
+    return response.json();
+  },
+
+  add: async (staff) => {
+    const response = await fetch(`${API_BASE_URL}/api/staff`, {
+      method: 'POST',
+      headers: DEFAULT_HEADERS,
+      body: JSON.stringify(staff)
+    });
+    return response.json();
+  },
+
+  update: async (id, updates) => {
+    const response = await fetch(`${API_BASE_URL}/api/staff/${id}`, {
+      method: 'PUT',
+      headers: DEFAULT_HEADERS,
+      body: JSON.stringify(updates)
+    });
+    return response.json();
+  },
+
+  delete: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/api/staff/${id}`, {
+      method: 'DELETE',
+      headers: DEFAULT_HEADERS
+    });
+    return response.json();
+  }
+};

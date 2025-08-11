@@ -94,14 +94,14 @@
 //           <button
 //             className="btn btn-warning d-flex align-items-center "
 //             style={{ whiteSpace: 'nowrap', gap: '0.5rem' }}
-//             onClick={handleShow}
+//             onClick={() => setShowAddModal(true)}
 //           >
 //             <FaPlus />
 //             Add New Staff
 //           </button>
 
 //           {/* Modal */}
-//           <Modal show={show} onHide={handleClose} centered>
+//           <Modal show={showAddModal} onHide={() => setShowAddModal(false)} centered>
 //             <Modal.Header closeButton>
 //               <Modal.Title>Add New Staff</Modal.Title>
 //             </Modal.Header>
@@ -508,6 +508,7 @@ import {
   Eye, EyeSlash, X, ChevronDown, Person, Gear
 } from 'react-bootstrap-icons';
 import { FaSearch, FaPlus } from "react-icons/fa";
+import { staffAPI } from '../../../services/apiService';
 
 // Default permissions for each role
 const ROLE_PERMISSIONS = {
@@ -569,11 +570,30 @@ const StaffManagement = () => {
     role: 'Staff'
   });
   const [permissions, setPermissions] = useState({});
-  const [staffMembers, setStaffMembers] = useState([
-    { id: 'sarah', name: 'Sarah Johnson', phone: '+1 (555) 123-4567', role: 'Admin', color: 'primary', ...ROLE_PERMISSIONS.Admin },
-    { id: 'michael', name: 'Michael Chen', phone: '+1 (555) 234-5678', role: 'Staff', color: 'success', ...ROLE_PERMISSIONS.Staff },
-    { id: 'emily', name: 'Emily Rodriguez', phone: '+1 (555) 345-6789', role: 'Manager', color: 'info', ...ROLE_PERMISSIONS.Manager }
-  ]);
+  const [staffMembers, setStaffMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const loadStaff = async () => {
+      try {
+        setLoading(true);
+        const response = await staffAPI.getAll();
+        if (response.success) {
+          setStaffMembers(response.staff);
+        } else {
+          setError(response.message);
+        }
+      } catch (err) {
+        setError('Failed to load staff members');
+        console.error('Error loading staff:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadStaff();
+  }, []);
 
   // Load permissions when staff is selected
   useEffect(() => {
@@ -605,38 +625,59 @@ const StaffManagement = () => {
     }));
   };
 
-  const handleSave = () => {
-    // Update staff permissions
-    const updatedStaff = staffMembers.map(staff =>
-      staff.id === selectedStaff ? { ...staff, ...permissions } : staff
-    );
-    setStaffMembers(updatedStaff);
-    setShowModal(false);
+  const handleSave = async () => {
+    try {
+      const response = await staffAPI.update(selectedStaff, permissions);
+      if (response.success) {
+        const updatedStaff = staffMembers.map(staff =>
+          staff.id === selectedStaff ? { ...staff, ...permissions } : staff
+        );
+        setStaffMembers(updatedStaff);
+        setShowModal(false);
+      } else {
+        setError(response.message);
+      }
+    } catch (err) {
+      setError('Failed to update staff member');
+      console.error('Error updating staff:', err);
+    }
   };
 
-  const handleAddStaff = () => {
-    const newStaffMember = {
-      id: newStaff.username.toLowerCase(),
-      name: newStaff.name,
-      phone: newStaff.phone,
-      role: newStaff.role,
-      color: newStaff.role === 'Admin' ? 'primary' : newStaff.role === 'Manager' ? 'info' : 'success',
-      ...ROLE_PERMISSIONS[newStaff.role]
-    };
-    setStaffMembers([...staffMembers, newStaffMember]);
-    setShowAddModal(false);
-    setNewStaff({
-      name: '',
-      username: '',
-      email: '',
-      password: '',
-      phone: '',
-      role: 'Staff'
-    });
+  const handleAddStaff = async () => {
+    try {
+      const response = await staffAPI.add(newStaff);
+      if (response.success) {
+        setStaffMembers([...staffMembers, response.staff]);
+        setShowAddModal(false);
+        setNewStaff({
+          name: '',
+          username: '',
+          email: '',
+          password: '',
+          phone: '',
+          role: 'Staff'
+        });
+      } else {
+        setError(response.message);
+      }
+    } catch (err) {
+      setError('Failed to add staff member');
+      console.error('Error adding staff:', err);
+    }
   };
 
-  const handleDeleteStaff = (id) => {
-    setStaffMembers(staffMembers.filter(staff => staff.id !== id));
+  const handleDeleteStaff = async (id) => {
+    try {
+      const response = await staffAPI.delete(id);
+      if (response.success) {
+        setStaffMembers(staffMembers.filter(staff => staff.id !== id));
+      } else {
+        setError(response.message);
+      }
+    } catch (err) {
+      setError('Failed to delete staff member');
+      console.error('Error deleting staff:', err);
+    }
   };
 
   const togglePasswordVisibility = () => {

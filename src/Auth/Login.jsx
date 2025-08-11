@@ -36,6 +36,11 @@ const Login = () => {
         { email: "admin@example.com", password: "123", role: "Admin" },
         { email: "staff@example.com", password: "123", role: "Staff" },
         { email: "user@example.com", password: "123", role: "User" },
+        { email: "demo@restaurant.com", password: "demo123", role: "Admin" },
+        { email: "kitchen@restaurant.com", password: "kitchen123", role: "Staff" },
+        { email: "manager@restaurant.com", password: "manager123", role: "Admin" },
+        { email: "waiter@restaurant.com", password: "waiter123", role: "Staff" },
+        { email: "customer@restaurant.com", password: "customer123", role: "User" },
       ];
 
       // Simulate network delay

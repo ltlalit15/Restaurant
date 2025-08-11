@@ -7,7 +7,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(cors({
-  origin: ['https://restaurant-ui-app-od9aq4fi.devinapps.com', 'http://localhost:5173'],
+  origin: ['https://restaurant-ui-app-od9aq4fi.devinapps.com', 'http://localhost:5173', 'https://restaurant-ui-app-tunnel-9b0ksdl3.devinapps.com'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']

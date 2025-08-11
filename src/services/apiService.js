@@ -6,7 +6,7 @@ const getApiConfig = () => {
     const credentials = url.username && url.password ? 
       btoa(`${url.username}:${url.password}`) : null;
     
-    const cleanUrl = `${url.protocol}//${url.host}${url.pathname}`;
+    const cleanUrl = `${url.protocol}//${url.host}`;
     
     return {
       baseUrl: cleanUrl,

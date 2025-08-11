@@ -13,10 +13,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const printerRoutes = require('./routes/printers');
 const kotRoutes = require('./routes/kot');
 const orderRoutes = require('./routes/orders');
+const authRoutes = require('./routes/auth');
 
 app.use('/api/printers', printerRoutes);
 app.use('/api/kot', kotRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/auth', authRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'KOT Backend API is running' });

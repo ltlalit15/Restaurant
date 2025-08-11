@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { RiPrinterLine, RiRestaurantLine, RiGobletLine, RiArrowDownSLine, RiLoader4Line, RiCheckLine, RiAddLine } from 'react-icons/ri';
+import React, { useState, useEffect } from 'react';
+import { RiPrinterLine, RiRestaurantLine, RiGobletLine, RiArrowDownSLine, RiLoader4Line, RiCheckLine, RiAddLine, RiWifiLine } from 'react-icons/ri';
 import { Modal, Button, Form } from 'react-bootstrap';
+import kotPrinter from '../../../utils/kotPrinter';
 
 const PrinterSetup = () => {
   // State for printer mappings
@@ -54,6 +55,9 @@ const PrinterSetup = () => {
   const [newPrinter, setNewPrinter] = useState({
     name: '',
     type: 'Kitchen Printer',
+    ip: '',
+    port: '9100',
+    paperSize: '80mm',
     active: true
   });
 
@@ -85,46 +89,70 @@ const PrinterSetup = () => {
   };
 
   // Test printer
-  const testPrinter = (id) => {
+  const testPrinter = async (id) => {
     setPrinters(printers.map(printer =>
       printer.id === id ? { ...printer, testPrinting: true } : printer
     ));
 
+    const result = await kotPrinter.testPrint(id);
+    
+    setPrinters(printers.map(printer =>
+      printer.id === id
+        ? { ...printer, testPrinting: false, testComplete: result.success }
+        : printer
+    ));
+
+    if (!result.success) {
+      alert(`Test print failed: ${result.message}`);
+    }
+
     setTimeout(() => {
       setPrinters(printers.map(printer =>
         printer.id === id
-          ? { ...printer, testPrinting: false, testComplete: true }
+          ? { ...printer, testComplete: false }
           : printer
       ));
-
-      setTimeout(() => {
-        setPrinters(printers.map(printer =>
-          printer.id === id
-            ? { ...printer, testComplete: false }
-            : printer
-        ));
-      }, 2000);
-    }, 1500);
+    }, 2000);
   };
 
   // Handle add new printer
-  const handleAddPrinter = () => {
-    const newPrinterObj = {
-      id: `${newPrinter.name.toLowerCase().replace(/\s+/g, '-')}-${Math.floor(Math.random() * 100)}`,
+  const handleAddPrinter = async () => {
+    const printerId = `${newPrinter.name.toLowerCase().replace(/\s+/g, '-')}-${Math.floor(Math.random() * 100)}`;
+    
+    const result = await kotPrinter.addNetworkPrinter(printerId, {
       name: newPrinter.name,
+      ip: newPrinter.ip,
+      port: parseInt(newPrinter.port),
       type: newPrinter.type,
-      active: newPrinter.active,
-      testPrinting: false,
-      testComplete: false
-    };
-
-    setPrinters([...printers, newPrinterObj]);
-    setShowAddPrinterModal(false);
-    setNewPrinter({
-      name: '',
-      type: 'Kitchen Printer',
-      active: true
+      paperSize: newPrinter.paperSize
     });
+
+    if (result.success) {
+      const newPrinterObj = {
+        id: printerId,
+        name: newPrinter.name,
+        type: newPrinter.type,
+        ip: newPrinter.ip,
+        port: newPrinter.port,
+        paperSize: newPrinter.paperSize,
+        active: newPrinter.active,
+        testPrinting: false,
+        testComplete: false
+      };
+
+      setPrinters([...printers, newPrinterObj]);
+      setShowAddPrinterModal(false);
+      setNewPrinter({
+        name: '',
+        type: 'Kitchen Printer',
+        ip: '',
+        port: '9100',
+        paperSize: '80mm',
+        active: true
+      });
+    } else {
+      alert(`Failed to add printer: ${result.message}`);
+    }
   };
 
   return (
@@ -246,6 +274,12 @@ const PrinterSetup = () => {
                             <div>
                               <h3 className="h6 mb-0">{printer.name}</h3>
                               <p className="small text-muted mb-0">{printer.type}</p>
+                              {printer.ip && (
+                                <p className="small text-muted mb-0">
+                                  <RiWifiLine className="me-1" />
+                                  {printer.ip}:{printer.port}
+                                </p>
+                              )}
                             </div>
                           </div>
                           <div className="d-flex align-items-center gap-2">
@@ -336,6 +370,37 @@ const PrinterSetup = () => {
             </Form.Group>
 
             <Form.Group className="mb-3">
+              <Form.Label>IP Address</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="e.g. 192.168.1.100"
+                value={newPrinter.ip}
+                onChange={(e) => setNewPrinter({ ...newPrinter, ip: e.target.value })}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Port</Form.Label>
+              <Form.Control
+                type="number"
+                placeholder="9100"
+                value={newPrinter.port}
+                onChange={(e) => setNewPrinter({ ...newPrinter, port: e.target.value })}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Paper Size</Form.Label>
+              <Form.Select
+                value={newPrinter.paperSize}
+                onChange={(e) => setNewPrinter({ ...newPrinter, paperSize: e.target.value })}
+              >
+                <option value="80mm">80mm (Standard)</option>
+                <option value="58mm">58mm (Compact)</option>
+              </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
               <Form.Check
                 type="switch"
                 id="active-switch"
@@ -350,7 +415,7 @@ const PrinterSetup = () => {
           <Button variant="secondary" onClick={() => setShowAddPrinterModal(false)}>
             Cancel
           </Button>
-          <Button variant="warning" onClick={handleAddPrinter} disabled={!newPrinter.name}>
+          <Button variant="warning" onClick={handleAddPrinter} disabled={!newPrinter.name || !newPrinter.ip}>
             Add Printer
           </Button>
         </Modal.Footer>

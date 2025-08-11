@@ -820,6 +820,7 @@ import './OrderManagement.css';
 import TableManagement from './TableManagement';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
+import kotPrinter from '../../../utils/kotPrinter';
 
 const OrdersManagement = () => {
   // State management
@@ -843,7 +844,8 @@ const OrdersManagement = () => {
   const [selectedSides, setSelectedSides] = useState([]);
   const [isSidesModalOpen, setIsSidesModalOpen] = useState(false);
   const [isActionsModalOpen, setIsActionsModalOpen] = useState(false);
-  // const [allOrders, setAllOrders] = useState([]);
+  const [allOrders, setAllOrders] = useState([]);
+  const [kotPrintStatus, setKotPrintStatus] = useState('');
 
   // Data
   const categories = [
@@ -998,7 +1000,7 @@ const OrdersManagement = () => {
     setActiveTab('register'); // Switch to register tab after selecting order
   };
 
-  const handlePayment = () => {
+  const handlePayment = async () => {
     if (orderItems.length === 0) {
       alert("Please add items to the order first");
       return;
@@ -1011,10 +1013,51 @@ const OrdersManagement = () => {
       items: [...orderItems],
       total: calculateTotal(),
       timestamp: new Date().toISOString(),
-      status: "pending"
+      status: "pending",
+      orderType: orderType,
+      specialInstructions: customerInfo.specialRequests || orderNote
     };
 
     setAllOrders([...allOrders, newOrder]);
+    
+    setKotPrintStatus('Printing KOT...');
+    
+    try {
+      const foodItems = orderItems.filter(item => 
+        ['food'].includes(selectedCategory) || 
+        ['Classic Bacon Burger', 'Gourmet Pizza', 'Grilled Chicken', 'Pasta Carbonara'].includes(item.name)
+      );
+      
+      const drinkItems = orderItems.filter(item => 
+        ['drinks'].includes(selectedCategory) || 
+        ['Coca Cola', 'Fresh Orange Juice', 'Iced Coffee', 'Lemonade'].includes(item.name)
+      );
+
+      if (foodItems.length > 0) {
+        const foodOrder = { ...newOrder, items: foodItems };
+        const result = await kotPrinter.printToCategory(foodOrder, 'food');
+        if (!result.success) {
+          console.warn('Food KOT print failed:', result.message);
+        }
+      }
+
+      if (drinkItems.length > 0) {
+        const drinkOrder = { ...newOrder, items: drinkItems };
+        const result = await kotPrinter.printToCategory(drinkOrder, 'drinks');
+        if (!result.success) {
+          console.warn('Drink KOT print failed:', result.message);
+        }
+      }
+
+      setKotPrintStatus('KOT printed successfully!');
+      setTimeout(() => setKotPrintStatus(''), 3000);
+      
+    } catch (error) {
+      console.error('KOT printing error:', error);
+      setKotPrintStatus('KOT print failed - check printer connection');
+      setTimeout(() => setKotPrintStatus(''), 5000);
+    }
+
     navigate("/staff/billingpayment");
   };
 
@@ -1062,44 +1105,52 @@ const OrdersManagement = () => {
   }, []);
 
 
-  const allOrders = [
+  const mockOrders = [
     {
       id: 100001,
       table: 'Table 1',
       customer: 'John Doe',
       items: [
-        { name: 'Burger', quantity: 2 },
-        { name: 'Fries', quantity: 1 }
+        { name: 'Burger', quantity: 2, price: 6.50 },
+        { name: 'Fries', quantity: 1, price: 2.75 }
       ],
       total: 15.75,
-      timestamp: new Date(),
-      status: 'completed'
+      timestamp: new Date().toISOString(),
+      status: 'completed',
+      orderType: 'dineIn',
+      specialInstructions: 'No onions'
     },
     {
       id: 100002,
       table: 'Table 2',
       customer: 'Jane Smith',
       items: [
-        { name: 'Pizza', quantity: 1 },
-        { name: 'Coke', quantity: 2 }
+        { name: 'Pizza', quantity: 1, price: 15.00 },
+        { name: 'Coke', quantity: 2, price: 2.50 }
       ],
       total: 20.00,
-      timestamp: new Date(),
-      status: 'pending'
+      timestamp: new Date().toISOString(),
+      status: 'pending',
+      orderType: 'takeOut',
+      specialInstructions: 'Extra cheese'
     },
     {
       id: 100003,
       table: 'Table 3',
       customer: 'Michael Scott',
       items: [
-        { name: 'Pasta', quantity: 1 },
-        { name: 'Wine', quantity: 1 }
+        { name: 'Pasta', quantity: 1, price: 14.99 },
+        { name: 'Wine', quantity: 1, price: 20.41 }
       ],
       total: 35.40,
-      timestamp: new Date(),
-      status: 'completed'
+      timestamp: new Date().toISOString(),
+      status: 'completed',
+      orderType: 'dineIn',
+      specialInstructions: ''
     }
   ];
+
+  const displayOrders = allOrders.length > 0 ? allOrders : mockOrders;
 
   return (
     <div className="p-3">
@@ -1294,9 +1345,16 @@ const OrdersManagement = () => {
                   <button
                     className="btn btn-warning btn-sm flex-grow-1"
                     onClick={handlePayment}
+                    disabled={orderItems.length === 0}
                   >
-                    {/* <i className="fa fa-credit-card me-1 small"></i>Pay */}
-                    Order
+                    {kotPrintStatus ? (
+                      <span className="small">{kotPrintStatus}</span>
+                    ) : (
+                      <>
+                        <i className="fa fa-print me-1 small"></i>
+                        Order & Print KOT
+                      </>
+                    )}
                   </button>
 
                   {/* <Link to="/staff/billingpayment">
@@ -1393,15 +1451,15 @@ const OrdersManagement = () => {
                         <th>Order ID</th>
                         <th>Table</th>
                         <th>Customer</th>
+                        <th>Type</th>
                         <th>Items</th>
                         <th>Total</th>
                         <th>Time</th>
-                        {/* <th>Status</th> */}
                         <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {allOrders.length === 0 ? (
+                      {displayOrders.length === 0 ? (
                         <tr>
                           <td colSpan="8" className="text-center py-5">
                             <i className="fa fa-receipt text-muted fs-1 mb-3"></i>
@@ -1410,7 +1468,7 @@ const OrdersManagement = () => {
                           </td>
                         </tr>
                       ) : (
-                        allOrders.map((order) => (
+                        displayOrders.map((order) => (
                           <tr
                             key={order.id}
                             className={`cursor-pointer ${selectedOrder && selectedOrder.id === order.id ? 'selected-row' : ''}`}
@@ -1419,6 +1477,15 @@ const OrdersManagement = () => {
                             <td>#{order.id.toString().slice(-6)}</td>
                             <td>{order.table}</td>
                             <td>{order.customer}</td>
+                            <td>
+                              <span className={`badge ${
+                                order.orderType === 'dineIn' ? 'bg-warning' :
+                                order.orderType === 'takeOut' ? 'bg-success' : 'bg-info'
+                              }`}>
+                                {order.orderType === 'dineIn' ? 'Dine In' :
+                                 order.orderType === 'takeOut' ? 'Take Out' : 'Delivery'}
+                              </span>
+                            </td>
                             <td>
                               <div className="d-flex flex-wrap gap-1">
                                 {order.items.map((item, idx) => (
@@ -1430,20 +1497,33 @@ const OrdersManagement = () => {
                             </td>
                             <td>${order.total.toFixed(2)}</td>
                             <td>{new Date(order.timestamp).toLocaleTimeString()}</td>
-                            {/* <td>
-                        <span className={`badge ${order.status === 'completed' ? 'bg-success' : 'bg-warning'}`}>
-                          {order.status}
-                        </span>
-                      </td> */}
                             <td>
-                              <Link to="/staff/billingpayment">
+                              <div className="d-flex gap-1">
                                 <button
-                                  className="btn btn-success btn-sm flex-grow-1"
-
+                                  onClick={async (e) => {
+                                    e.stopPropagation();
+                                    try {
+                                      const result = await kotPrinter.printToCategory(order, 'food');
+                                      if (result.success) {
+                                        alert('KOT reprinted successfully!');
+                                      } else {
+                                        alert(`Reprint failed: ${result.message}`);
+                                      }
+                                    } catch (error) {
+                                      alert('Reprint failed - check printer connection');
+                                    }
+                                  }}
+                                  className="btn btn-outline-secondary btn-sm"
+                                  title="Reprint KOT"
                                 >
-                                  <i className="fa fa-credit-card me-1 small"></i>Pay
+                                  <i className="fa fa-print"></i>
                                 </button>
-                              </Link>
+                                <Link to="/staff/billingpayment">
+                                  <button className="btn btn-success btn-sm">
+                                    <i className="fa fa-credit-card me-1 small"></i>Pay
+                                  </button>
+                                </Link>
+                              </div>
                             </td>
                           </tr>
                         ))

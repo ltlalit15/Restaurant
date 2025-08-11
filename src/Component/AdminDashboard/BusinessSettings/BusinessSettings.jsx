@@ -439,8 +439,85 @@ const BusinessSettings = () => {
             </div>
           </div>
 
+          {/* KOT Settings Card */}
+          <div className="col-lg-6">
+            <div className="bg-white rounded shadow-sm border p-4">
+              <div className="d-flex align-items-center mb-4">
+                <RiPrinterLine className="text-dark fs-5 me-3" />
+                <h2 className="fs-5 fw-semibold text-dark">KOT Settings</h2>
+              </div>
+              
+              <div className="mb-4">
+                <label className="d-block small fw-medium text-dark mb-2">Auto-Print Options</label>
+                <div className="form-check mb-2">
+                  <input 
+                    className="form-check-input" 
+                    type="checkbox" 
+                    id="autoPrintKOT" 
+                    checked={true}
+                    readOnly
+                  />
+                  <label className="form-check-label" htmlFor="autoPrintKOT">
+                    Automatically print KOT when order is created
+                  </label>
+                </div>
+                <div className="form-check mb-2">
+                  <input 
+                    className="form-check-input" 
+                    type="checkbox" 
+                    id="printDuplicates" 
+                    checked={true}
+                    readOnly
+                  />
+                  <label className="form-check-label" htmlFor="printDuplicates">
+                    Print duplicate slips for shared items
+                  </label>
+                </div>
+              </div>
+              
+              <div className="mb-4">
+                <label className="d-block small fw-medium text-dark mb-2">Default Paper Size</label>
+                <div className="form-check mb-2">
+                  <input 
+                    className="form-check-input" 
+                    type="radio" 
+                    name="paperSize" 
+                    id="paperSize80mm" 
+                    checked={true}
+                    readOnly
+                  />
+                  <label className="form-check-label" htmlFor="paperSize80mm">
+                    80mm (Standard)
+                  </label>
+                </div>
+                <div className="form-check mb-2">
+                  <input 
+                    className="form-check-input" 
+                    type="radio" 
+                    name="paperSize" 
+                    id="paperSize58mm" 
+                    checked={false}
+                    readOnly
+                  />
+                  <label className="form-check-label" htmlFor="paperSize58mm">
+                    58mm (Compact)
+                  </label>
+                </div>
+              </div>
+              
+              <div className="d-flex gap-3">
+                <button className="btn btn-warning text-dark fw-medium">
+                  Save KOT Settings
+                </button>
+                <button className="btn btn-outline-secondary fw-medium">
+                  Reset
+                </button>
+              </div>
+            </div>
+          </div>
+
           {/* Offline Mode Card */}
-          <div className="col-12">
+          <div className="col-lg-6">
             <div className="bg-white rounded shadow-sm border p-4">
               <div className="d-flex justify-content-between align-items-center mb-4">
                 <div className="d-flex align-items-center">

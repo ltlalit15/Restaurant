@@ -5,6 +5,7 @@ import {
     RiSearchLine, RiRestaurantLine, RiCupLine, RiCheckLine,
     RiTimeLine, RiTimerLine
 } from 'react-icons/ri';
+import kotPrinter from '../../../utils/kotPrinter';
 
 const KOTQueue = () => {
     const [activeTab, setActiveTab] = useState('activeKots');
@@ -12,47 +13,83 @@ const KOTQueue = () => {
     const [kots, setKots] = useState([
         {
             id: 'KOT-2025-001',
+            orderNumber: '#12345',
             table: 'Table 12',
-            session: 'Gaming Session #GS-4521',
-            items: ['2x Chicken Wings', '1x Caesar Salad'],
-            category: 'Food',
-            timeElapsed: '12 min',
-            priority: 'High Priority',
-            status: 'Pending',
-            completed: false
+            customer: 'John Doe',
+            items: [
+                { name: 'Chicken Wings', quantity: 2, notes: 'Extra spicy', price: 12.99 },
+                { name: 'Caesar Salad', quantity: 1, notes: 'No croutons', price: 8.99 }
+            ],
+            orderType: 'dineIn',
+            priority: 'normal',
+            estimatedTime: 25,
+            timeElapsed: 12,
+            status: 'preparing',
+            lastUpdated: new Date(Date.now() - 12 * 60000),
+            specialInstructions: 'Customer has nut allergy',
+            printer: 'Kitchen Printer 1',
+            timestamp: new Date().toISOString(),
+            total: 21.98
         },
         {
             id: 'KOT-2025-002',
+            orderNumber: '#12346',
             table: 'Table 8',
-            session: 'Gaming Session #GS-4522',
-            items: ['2x Energy Drinks', '1x Coffee'],
-            category: 'Beverages',
-            timeElapsed: '8 min',
-            priority: 'Normal Priority',
-            status: 'Pending',
-            completed: false
+            customer: 'Jane Smith',
+            items: [
+                { name: 'Energy Drinks', quantity: 2, notes: 'Extra cold', price: 3.99 },
+                { name: 'Coffee', quantity: 1, notes: 'Extra shot', price: 4.99 }
+            ],
+            orderType: 'takeOut',
+            priority: 'high',
+            estimatedTime: 15,
+            timeElapsed: 8,
+            status: 'preparing',
+            lastUpdated: new Date(Date.now() - 8 * 60000),
+            specialInstructions: '',
+            printer: 'Bar Printer 1',
+            timestamp: new Date().toISOString(),
+            total: 12.97
         },
         {
             id: 'KOT-2025-003',
+            orderNumber: '#12347',
             table: 'Table 15',
-            session: 'Gaming Session #GS-4523',
-            items: ['1x Margherita Pizza', '2x Garlic Bread'],
-            category: 'Food',
-            timeElapsed: 'Completed',
-            completedTime: '2 min ago',
-            status: 'Completed',
-            completed: true
+            customer: 'Mike Johnson',
+            items: [
+                { name: 'Margherita Pizza', quantity: 1, notes: 'Extra cheese', price: 15.99 },
+                { name: 'Garlic Bread', quantity: 2, notes: '', price: 4.99 }
+            ],
+            orderType: 'delivery',
+            priority: 'normal',
+            estimatedTime: 30,
+            timeElapsed: 25,
+            status: 'ready',
+            lastUpdated: new Date(Date.now() - 25 * 60000),
+            specialInstructions: 'Deliver to back entrance',
+            printer: 'Kitchen Printer 2',
+            timestamp: new Date().toISOString(),
+            total: 25.97
         },
         {
             id: 'KOT-2025-004',
+            orderNumber: '#12348',
             table: 'Table 3',
-            session: 'Gaming Session #GS-4524',
-            items: ['3x Nachos Supreme', '2x Coca Cola'],
-            category: 'Mixed',
-            timeElapsed: '5 min',
-            priority: 'Normal Priority',
-            status: 'Pending',
-            completed: false
+            customer: 'Sarah Wilson',
+            items: [
+                { name: 'Nachos Supreme', quantity: 3, notes: 'Extra jalapeños', price: 9.99 },
+                { name: 'Coca Cola', quantity: 2, notes: 'No ice', price: 2.99 }
+            ],
+            orderType: 'dineIn',
+            priority: 'normal',
+            estimatedTime: 20,
+            timeElapsed: 5,
+            status: 'preparing',
+            lastUpdated: new Date(Date.now() - 5 * 60000),
+            specialInstructions: '',
+            printer: 'Kitchen Printer 1',
+            timestamp: new Date().toISOString(),
+            total: 35.95
         }
     ]);
 
@@ -63,22 +100,31 @@ const KOTQueue = () => {
         return () => clearInterval(timer);
     }, []);
 
-    const handleMarkComplete = (id) => {
-        setKots(kots.map(kot => {
-            if (kot.id === id) {
-                return {
-                    ...kot,
-                    status: 'Completed',
-                    timeElapsed: 'Completed',
-                    completedTime: 'Just now',
-                    completed: true
-                };
-            }
-            return kot;
-        }));
+    const handleMarkComplete = (kotId) => {
+        setKots(prevKots =>
+            prevKots.map(kot =>
+                kot.id === kotId
+                    ? {
+                        ...kot,
+                        status: 'ready',
+                        lastUpdated: new Date()
+                    }
+                    : kot
+            )
+        );
     };
 
-    const formatLastUpdated = () => {
+    const formatLastUpdated = (timestamp) => {
+        const now = new Date();
+        const updated = new Date(timestamp);
+        const diffInMinutes = Math.floor((now - updated) / (1000 * 60));
+        
+        if (diffInMinutes < 1) return 'Just now';
+        if (diffInMinutes === 1) return '1 min ago';
+        return `${diffInMinutes} min ago`;
+    };
+
+    const formatGlobalLastUpdated = () => {
         if (lastUpdated < 60) {
             return `Last updated: ${lastUpdated} seconds ago`;
         } else {
@@ -104,7 +150,7 @@ const KOTQueue = () => {
                         <div className="d-flex align-items-center gap-3">
                             <div className="kot-update-status d-flex align-items-center gap-2 small text-muted">
                                 <div className="kot-status-indicator bg-success rounded-circle"></div>
-                                <span>{formatLastUpdated()}</span>
+                                <span>{formatGlobalLastUpdated()}</span>
                             </div>
                             <button className="kot-refresh-btn btn btn-warning text-dark rounded-1 fw-medium d-flex align-items-center">
                                 <RiRefreshLine className="me-2" />
@@ -183,37 +229,44 @@ const KOTQueue = () => {
                                                     </td>
                                                     <td className="kot-table-td px-4 py-3">
                                                         {kot.items.map((item, i) => (
-                                                            <div key={i} className="kot-item-info">{item}</div>
+                                                            <div key={i} className="kot-item-info">{item.quantity}x {item.name}</div>
                                                         ))}
                                                         <div className="kot-item-count small text-muted">{`${kot.items.length} items total`}</div>
                                                     </td>
                                                     <td className="kot-table-td px-4 py-3">
-                                                        <span className={`kot-category-badge d-inline-flex align-items-center px-2 py-1 rounded-pill small fw-medium ${kot.category === 'Food' ? 'bg-orange-100 text-orange-800' :
-                                                            kot.category === 'Beverages' ? 'bg-blue-100 text-blue-800' :
-                                                                'bg-purple-100 text-purple-800'
-                                                            }`}>
-                                                            {kot.category === 'Food' && <RiRestaurantLine className="me-1" />}
-                                                            {kot.category === 'Beverages' && <RiCupLine className="me-1" />}
-                                                            {kot.category}
+                                                        <span className={`kot-category-badge d-inline-flex align-items-center px-2 py-1 rounded-pill small fw-medium ${
+                                                            kot.orderType === 'dineIn' ? 'bg-orange-100 text-orange-800' :
+                                                            kot.orderType === 'takeOut' ? 'bg-blue-100 text-blue-800' :
+                                                            'bg-purple-100 text-purple-800'
+                                                        }`}>
+                                                            {kot.orderType === 'dineIn' && <RiRestaurantLine className="me-1" />}
+                                                            {kot.orderType === 'takeOut' && <RiCupLine className="me-1" />}
+                                                            {kot.orderType === 'dineIn' ? 'Dine In' : 
+                                                             kot.orderType === 'takeOut' ? 'Takeaway' : 'Delivery'}
                                                         </span>
                                                     </td>
                                                     <td className="kot-table-td px-4 py-3">
-                                                        <div className={`kot-time-elapsed small fw-medium ${kot.timeElapsed === 'Completed' ? 'text-success' :
-                                                            kot.timeElapsed === '12 min' ? 'text-danger' : 'text-warning'
-                                                            }`}>
-                                                            {kot.timeElapsed}
+                                                        <div className={`kot-time-elapsed small fw-medium ${
+                                                            kot.timeElapsed > 20 ? 'text-danger' : 
+                                                            kot.timeElapsed > 10 ? 'text-warning' : 'text-success'
+                                                        }`}>
+                                                            {kot.timeElapsed} min
                                                         </div>
-                                                        {kot.priority && <div className="kot-priority-info small text-muted">{kot.priority}</div>}
-                                                        {kot.completedTime && <div className="kot-completed-time small text-muted">{kot.completedTime}</div>}
+                                                        {kot.priority && <div className="kot-priority-info small text-muted">{
+                                                            kot.priority === 'high' ? 'High Priority' : 
+                                                            kot.priority === 'normal' ? 'Normal Priority' : 'Low Priority'
+                                                        }</div>}
                                                     </td>
                                                     <td className="kot-table-td px-4 py-3">
-                                                        <span className={`kot-status-badge d-inline-flex align-items-center px-2 py-1 rounded-pill small fw-medium ${kot.status === 'Completed' ? 'bg-success-100 text-success-800' : 'bg-warning-100 text-warning-800'
-                                                            }`}>
-                                                            {kot.status}
+                                                        <span className={`kot-status-badge d-inline-flex align-items-center px-2 py-1 rounded-pill small fw-medium ${
+                                                            kot.status === 'ready' ? 'bg-success-100 text-success-800' : 
+                                                            'bg-warning-100 text-warning-800'
+                                                        }`}>
+                                                            {kot.status === 'ready' ? 'Completed' : 'Preparing'}
                                                         </span>
                                                     </td>
                                                     <td className="kot-table-td px-4 py-3">
-                                                        {!kot.completed ? (
+                                                        {kot.status !== 'ready' ? (
                                                             <button
                                                                 className="kot-complete-btn btn btn-success text-white rounded-1 small fw-medium px-3 py-1"
                                                                 onClick={() => handleMarkComplete(kot.id)}
@@ -264,7 +317,15 @@ const KOTQueue = () => {
                                         </div>
 
                                         <div className="kot-order-list">
-                                            {kots.filter(kot => kot.category === 'Food' || kot.category === 'Mixed').map((kot, index) => (
+                                            {kots.filter(kot => 
+                                                kot.items.some(item => 
+                                                    item.name.includes('Wings') || 
+                                                    item.name.includes('Salad') || 
+                                                    item.name.includes('Pizza') || 
+                                                    item.name.includes('Bread') || 
+                                                    item.name.includes('Nachos')
+                                                )
+                                            ).map((kot, index) => (
                                                 <div key={index} className="kot-order-card border border-light rounded-1 p-3 mb-3">
                                                     <div className="kot-order-header d-flex justify-content-between align-items-center mb-2">
                                                         <span className="kot-order-id fw-medium text-dark">{`#${kot.id}`}</span>
@@ -274,12 +335,18 @@ const KOTQueue = () => {
                                                         </span>
                                                     </div>
                                                     <div className="kot-order-items small text-muted">
-                                                        {kot.items.filter(item => item.includes('Wings') || item.includes('Salad') || item.includes('Pizza') || item.includes('Bread') || item.includes('Nachos')).map((item, i) => (
-                                                            <div key={i}>{item}</div>
+                                                        {kot.items.filter(item => 
+                                                            item.name.includes('Wings') || 
+                                                            item.name.includes('Salad') || 
+                                                            item.name.includes('Pizza') || 
+                                                            item.name.includes('Bread') || 
+                                                            item.name.includes('Nachos')
+                                                        ).map((item, i) => (
+                                                            <div key={i}>{item.quantity}x {item.name}</div>
                                                         ))}
                                                     </div>
                                                     <div className="kot-order-time small text-muted mt-2">
-                                                        {kot.table} • {kot.timeElapsed === 'Completed' ? `Completed ${kot.completedTime}` : `${kot.timeElapsed} ago`}
+                                                        {kot.table} • {kot.status === 'ready' ? 'Completed' : `${kot.timeElapsed} min ago`}
                                                     </div>
                                                 </div>
                                             ))}
@@ -307,7 +374,13 @@ const KOTQueue = () => {
                                         </div>
 
                                         <div className="kot-order-list">
-                                            {kots.filter(kot => kot.category === 'Beverages' || kot.category === 'Mixed').map((kot, index) => (
+                                            {kots.filter(kot => 
+                                                kot.items.some(item => 
+                                                    item.name.includes('Drinks') || 
+                                                    item.name.includes('Coffee') || 
+                                                    item.name.includes('Cola')
+                                                )
+                                            ).map((kot, index) => (
                                                 <div key={index} className={`kot-order-card border border-light rounded-1 p-3 mb-3 ${index === 2 ? 'opacity-50' : ''}`}>
                                                     <div className="kot-order-header d-flex justify-content-between align-items-center mb-2">
                                                         <span className="kot-order-id fw-medium text-dark">{`#${kot.id}`}</span>
@@ -317,12 +390,16 @@ const KOTQueue = () => {
                                                         </span>
                                                     </div>
                                                     <div className="kot-order-items small text-muted">
-                                                        {kot.items.filter(item => item.includes('Drinks') || item.includes('Coffee') || item.includes('Cola')).map((item, i) => (
-                                                            <div key={i}>{item}</div>
+                                                        {kot.items.filter(item => 
+                                                            item.name.includes('Drinks') || 
+                                                            item.name.includes('Coffee') || 
+                                                            item.name.includes('Cola')
+                                                        ).map((item, i) => (
+                                                            <div key={i}>{item.quantity}x {item.name}</div>
                                                         ))}
                                                     </div>
                                                     <div className="kot-order-time small text-muted mt-2">
-                                                        {kot.table} • {index === 2 ? 'Just now' : `${kot.timeElapsed} ago`}
+                                                        {kot.table} • {kot.status === 'ready' ? 'Completed' : `${kot.timeElapsed} min ago`}
                                                     </div>
                                                 </div>
                                             ))}

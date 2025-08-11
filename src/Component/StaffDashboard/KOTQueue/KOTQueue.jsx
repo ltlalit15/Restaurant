@@ -6,6 +6,7 @@ import {
     RiTimeLine, RiTimerLine
 } from 'react-icons/ri';
 import kotPrinter from '../../../utils/kotPrinter';
+import { kotAPI, orderAPI } from '../../../services/apiService';
 
 const KOTQueue = () => {
     const [activeTab, setActiveTab] = useState('activeKots');
@@ -94,24 +95,67 @@ const KOTQueue = () => {
     ]);
 
     useEffect(() => {
+        loadKOTs();
+        
         const timer = setInterval(() => {
             setLastUpdated(prev => prev + 1);
-        }, 1000);
+            loadKOTs(); // Refresh KOTs every minute
+        }, 60000);
         return () => clearInterval(timer);
     }, []);
 
-    const handleMarkComplete = (kotId) => {
-        setKots(prevKots =>
-            prevKots.map(kot =>
-                kot.id === kotId
-                    ? {
-                        ...kot,
-                        status: 'ready',
-                        lastUpdated: new Date()
-                    }
-                    : kot
-            )
-        );
+    const loadKOTs = async () => {
+        try {
+            const response = await kotAPI.getQueue();
+            if (response.success) {
+                const formattedKots = response.kots.map(kot => ({
+                    ...kot,
+                    orderNumber: kot.orderId,
+                    timeElapsed: Math.floor((new Date() - new Date(kot.createdAt)) / 60000),
+                    lastUpdated: new Date(kot.createdAt),
+                    priority: 'normal',
+                    estimatedTime: 25,
+                    printer: kot.printerType === 'kitchen' ? 'Kitchen Printer 1' : 'Bar Printer 1'
+                }));
+                setKots(formattedKots);
+            }
+        } catch (error) {
+            console.error('Failed to load KOTs:', error);
+        }
+    };
+
+    const handleMarkComplete = async (kotId) => {
+        try {
+            const response = await kotAPI.updateStatus(kotId, 'completed');
+            if (response.success) {
+                setKots(prevKots =>
+                    prevKots.map(kot =>
+                        kot.id === kotId
+                            ? {
+                                ...kot,
+                                status: 'ready',
+                                lastUpdated: new Date()
+                            }
+                            : kot
+                    )
+                );
+            }
+        } catch (error) {
+            console.error('Failed to update KOT status:', error);
+        }
+    };
+
+    const handleReprint = async (kotId) => {
+        try {
+            const response = await kotAPI.reprint(kotId);
+            if (response.success) {
+                console.log('KOT reprinted successfully');
+            } else {
+                console.error('Failed to reprint KOT:', response.message);
+            }
+        } catch (error) {
+            console.error('Failed to reprint KOT:', error);
+        }
     };
 
     const formatLastUpdated = (timestamp) => {

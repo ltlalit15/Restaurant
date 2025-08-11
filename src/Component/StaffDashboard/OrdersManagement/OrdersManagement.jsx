@@ -821,6 +821,7 @@ import TableManagement from './TableManagement';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import kotPrinter from '../../../utils/kotPrinter';
+import { orderAPI, kotAPI } from '../../../services/apiService';
 
 const OrdersManagement = () => {
   // State management
@@ -1007,54 +1008,57 @@ const OrdersManagement = () => {
     }
 
     const newOrder = {
-      id: Date.now(),
       table: selectedTable || "N/A",
       customer: customerInfo.name || "Walk-in Customer",
       items: [...orderItems],
-      total: calculateTotal(),
-      timestamp: new Date().toISOString(),
-      status: "pending",
       orderType: orderType,
       specialInstructions: customerInfo.specialRequests || orderNote
     };
 
-    setAllOrders([...allOrders, newOrder]);
-    
-    setKotPrintStatus('Printing KOT...');
+    setKotPrintStatus('Creating order and printing KOT...');
     
     try {
-      const foodItems = orderItems.filter(item => 
-        ['food'].includes(selectedCategory) || 
-        ['Classic Bacon Burger', 'Gourmet Pizza', 'Grilled Chicken', 'Pasta Carbonara'].includes(item.name)
-      );
+      const response = await orderAPI.create(newOrder);
       
-      const drinkItems = orderItems.filter(item => 
-        ['drinks'].includes(selectedCategory) || 
-        ['Coca Cola', 'Fresh Orange Juice', 'Iced Coffee', 'Lemonade'].includes(item.name)
-      );
+      if (response.success) {
+        setAllOrders([...allOrders, response.order]);
+        
+        const foodItems = orderItems.filter(item => 
+          ['food'].includes(selectedCategory) || 
+          ['Classic Bacon Burger', 'Gourmet Pizza', 'Grilled Chicken', 'Pasta Carbonara'].includes(item.name)
+        );
+        
+        const drinkItems = orderItems.filter(item => 
+          ['drinks'].includes(selectedCategory) || 
+          ['Coca Cola', 'Fresh Orange Juice', 'Iced Coffee', 'Lemonade'].includes(item.name)
+        );
 
-      if (foodItems.length > 0) {
-        const foodOrder = { ...newOrder, items: foodItems };
-        const result = await kotPrinter.printToCategory(foodOrder, 'food');
-        if (!result.success) {
-          console.warn('Food KOT print failed:', result.message);
+        if (foodItems.length > 0) {
+          const foodOrder = { ...response.order, items: foodItems };
+          const result = await kotAPI.print(foodOrder, 'kitchen');
+          if (!result.success) {
+            console.warn('Food KOT print failed:', result.message);
+          }
         }
-      }
 
-      if (drinkItems.length > 0) {
-        const drinkOrder = { ...newOrder, items: drinkItems };
-        const result = await kotPrinter.printToCategory(drinkOrder, 'drinks');
-        if (!result.success) {
-          console.warn('Drink KOT print failed:', result.message);
+        if (drinkItems.length > 0) {
+          const drinkOrder = { ...response.order, items: drinkItems };
+          const result = await kotAPI.print(drinkOrder, 'bar');
+          if (!result.success) {
+            console.warn('Drink KOT print failed:', result.message);
+          }
         }
-      }
 
-      setKotPrintStatus('KOT printed successfully!');
-      setTimeout(() => setKotPrintStatus(''), 3000);
+        setKotPrintStatus('Order created and KOT printed successfully!');
+        setTimeout(() => setKotPrintStatus(''), 3000);
+      } else {
+        setKotPrintStatus('Failed to create order: ' + response.message);
+        setTimeout(() => setKotPrintStatus(''), 5000);
+      }
       
     } catch (error) {
-      console.error('KOT printing error:', error);
-      setKotPrintStatus('KOT print failed - check printer connection');
+      console.error('Order creation error:', error);
+      setKotPrintStatus('Failed to create order - check connection');
       setTimeout(() => setKotPrintStatus(''), 5000);
     }
 

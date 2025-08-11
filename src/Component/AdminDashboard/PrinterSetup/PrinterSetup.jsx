@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { RiPrinterLine, RiRestaurantLine, RiGobletLine, RiArrowDownSLine, RiLoader4Line, RiCheckLine, RiAddLine, RiWifiLine } from 'react-icons/ri';
 import { Modal, Button, Form } from 'react-bootstrap';
 import kotPrinter from '../../../utils/kotPrinter';
+import { printerAPI } from '../../../services/apiService';
 
 const PrinterSetup = () => {
   // State for printer mappings
@@ -15,43 +16,30 @@ const PrinterSetup = () => {
   const [barSaveStatus, setBarSaveStatus] = useState(false);
 
   // State for printer controls
-  const [printers, setPrinters] = useState([
-    {
-      id: 'hp-kitchen-01',
-      name: 'HP LaserJet Kitchen 01',
-      type: 'Kitchen Printer',
-      active: true,
-      testPrinting: false,
-      testComplete: false
-    },
-    {
-      id: 'canon-bar-01',
-      name: 'Canon PIXMA Bar 01',
-      type: 'Bar Printer',
-      active: true,
-      testPrinting: false,
-      testComplete: false
-    },
-    {
-      id: 'epson-kitchen-02',
-      name: 'Epson TM-T88VI Kitchen 02',
-      type: 'Kitchen Printer',
-      active: false,
-      testPrinting: false,
-      testComplete: false
-    },
-    {
-      id: 'brother-bar-03',
-      name: 'Brother HL-L2350DW Bar 03',
-      type: 'Bar Printer',
-      active: false,
-      testPrinting: false,
-      testComplete: false
-    }
-  ]);
+  const [printers, setPrinters] = useState([]);
 
   // State for add printer modal
   const [showAddPrinterModal, setShowAddPrinterModal] = useState(false);
+
+  useEffect(() => {
+    loadPrinters();
+  }, []);
+
+  const loadPrinters = async () => {
+    try {
+      const response = await printerAPI.getAll();
+      if (response && Array.isArray(response)) {
+        setPrinters(response.map(printer => ({
+          ...printer,
+          active: true,
+          testPrinting: false,
+          testComplete: false
+        })));
+      }
+    } catch (error) {
+      console.error('Failed to load printers:', error);
+    }
+  };
   const [newPrinter, setNewPrinter] = useState({
     name: '',
     type: 'Kitchen Printer',
@@ -94,16 +82,25 @@ const PrinterSetup = () => {
       printer.id === id ? { ...printer, testPrinting: true } : printer
     ));
 
-    const result = await kotPrinter.testPrint(id);
-    
-    setPrinters(printers.map(printer =>
-      printer.id === id
-        ? { ...printer, testPrinting: false, testComplete: result.success }
-        : printer
-    ));
+    try {
+      const result = await printerAPI.test(id);
+      
+      setPrinters(printers.map(printer =>
+        printer.id === id
+          ? { ...printer, testPrinting: false, testComplete: result.success }
+          : printer
+      ));
 
-    if (!result.success) {
-      alert(`Test print failed: ${result.message}`);
+      if (!result.success) {
+        alert(`Test print failed: ${result.message}`);
+      }
+    } catch (error) {
+      setPrinters(printers.map(printer =>
+        printer.id === id
+          ? { ...printer, testPrinting: false, testComplete: false }
+          : printer
+      ));
+      alert(`Test print failed: ${error.message}`);
     }
 
     setTimeout(() => {
@@ -117,41 +114,43 @@ const PrinterSetup = () => {
 
   // Handle add new printer
   const handleAddPrinter = async () => {
-    const printerId = `${newPrinter.name.toLowerCase().replace(/\s+/g, '-')}-${Math.floor(Math.random() * 100)}`;
-    
-    const result = await kotPrinter.addNetworkPrinter(printerId, {
-      name: newPrinter.name,
-      ip: newPrinter.ip,
-      port: parseInt(newPrinter.port),
-      type: newPrinter.type,
-      paperSize: newPrinter.paperSize
-    });
-
-    if (result.success) {
-      const newPrinterObj = {
-        id: printerId,
+    try {
+      const result = await printerAPI.add({
         name: newPrinter.name,
-        type: newPrinter.type,
         ip: newPrinter.ip,
-        port: newPrinter.port,
-        paperSize: newPrinter.paperSize,
-        active: newPrinter.active,
-        testPrinting: false,
-        testComplete: false
-      };
-
-      setPrinters([...printers, newPrinterObj]);
-      setShowAddPrinterModal(false);
-      setNewPrinter({
-        name: '',
-        type: 'Kitchen Printer',
-        ip: '',
-        port: '9100',
-        paperSize: '80mm',
-        active: true
+        port: parseInt(newPrinter.port),
+        type: newPrinter.type,
+        paperSize: newPrinter.paperSize
       });
-    } else {
-      alert(`Failed to add printer: ${result.message}`);
+
+      if (result.success) {
+        const newPrinterObj = {
+          id: result.printer.id,
+          name: newPrinter.name,
+          type: newPrinter.type,
+          ip: newPrinter.ip,
+          port: newPrinter.port,
+          paperSize: newPrinter.paperSize,
+          active: newPrinter.active,
+          testPrinting: false,
+          testComplete: false
+        };
+
+        setPrinters([...printers, newPrinterObj]);
+        setShowAddPrinterModal(false);
+        setNewPrinter({
+          name: '',
+          type: 'Kitchen Printer',
+          ip: '',
+          port: '9100',
+          paperSize: '80mm',
+          active: true
+        });
+      } else {
+        alert(`Failed to add printer: ${result.message}`);
+      }
+    } catch (error) {
+      alert(`Failed to add printer: ${error.message}`);
     }
   };
 

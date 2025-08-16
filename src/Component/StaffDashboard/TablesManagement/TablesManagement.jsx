@@ -605,16 +605,24 @@
 
 
 
+
 import React, { useState, useEffect } from 'react';
 import { RiDashboardLine, RiTableLine, RiBarChartLine, RiSettingsLine, RiUserLine, RiNotificationLine, RiGridLine, RiListCheck, RiBilliardsLine, RiGamepadLine, RiRestaurantLine, RiStopLine, RiPlayLine, RiArrowDownSLine, RiCloseLine } from 'react-icons/ri';
 import { FaPlaystation } from 'react-icons/fa';
 import { Modal, Button, Form } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 
 const TablesManagement = () => {
+  
+    const navigate = useNavigate()
+
     // State declarations
     const [showTableModal, setShowTableModal] = useState(false);
     const [selectedTable, setSelectedTable] = useState(null);
     const [showCloseConfirm, setShowCloseConfirm] = useState(false);
+    const [confirmToggleTable, setConfirmToggleTable] = useState(null);
+const [showToggleConfirm, setShowToggleConfirm] = useState(false);
+
     const [members, setMembers] = useState([
         { id: 1, name: 'John Doe', discount: 10 },
         { id: 2, name: 'Jane Smith', discount: 5 },
@@ -745,7 +753,7 @@ const TablesManagement = () => {
     // Start new session
     const startNewSession = () => {
         if (selectedTable.type === 'restaurant' && selectedItems.length === 0) {
-            alert('Please add at least one menu item');
+           navigate("/staff/ordermanagement")
             return;
         }
 
@@ -1098,16 +1106,21 @@ const TablesManagement = () => {
 
                                             <div className="d-grid gap-1 gap-md-2">
                                                 <div className="d-flex gap-1">
-                                                    <button
-                                                        className={`btn btn-sm flex-grow-1 ${table.status === 'running' ? 'btn-danger' : 'btn-success'}`}
-                                                        onClick={(e) => toggleSession(table.id, e)}
-                                                    >
-                                                        {table.status === 'running' ? (
-                                                            <RiStopLine className="fs-6" />
-                                                        ) : (
-                                                            <RiPlayLine className="fs-6" />
-                                                        )}
-                                                    </button>
+                                                <button
+    className={`btn btn-sm flex-grow-1 ${table.status === 'running' ? 'btn-danger' : 'btn-success'}`}
+    onClick={(e) => {
+        e.stopPropagation();
+        setConfirmToggleTable(table);
+        setShowToggleConfirm(true);
+    }}
+>
+    {table.status === 'running' ? (
+        <RiStopLine className="fs-6" />
+    ) : (
+        <RiPlayLine className="fs-6" />
+    )}
+</button>
+
 
                                                     <button
                                                         className="btn btn-sm btn-outline-secondary flex-grow-1"
@@ -1308,6 +1321,31 @@ const TablesManagement = () => {
                         </Button>
                     </Modal.Footer>
                 </Modal>
+
+
+
+                // Add a new modal for confirmation (similar to close session modal):
+<Modal show={showToggleConfirm} onHide={() => setShowToggleConfirm(false)}>
+    <Modal.Header closeButton>
+        <Modal.Title>
+            {confirmToggleTable?.status === 'running' ? 'Confirm Stop Session' : 'Confirm Start Session'}
+        </Modal.Title>
+    </Modal.Header>
+    <Modal.Body>
+        Are you sure you want to {confirmToggleTable?.status === 'running' ? 'stop' : 'start'} the session for <strong>{confirmToggleTable?.name}</strong>?
+    </Modal.Body>
+    <Modal.Footer>
+        <Button variant="secondary" onClick={() => setShowToggleConfirm(false)}>
+            Cancel
+        </Button>
+        <Button variant={confirmToggleTable?.status === 'running' ? 'danger' : 'success'} onClick={() => {
+            toggleSession(confirmToggleTable.id, new Event('click'));
+            setShowToggleConfirm(false);
+        }}>
+            {confirmToggleTable?.status === 'running' ? 'Stop' : 'Start'}
+        </Button>
+    </Modal.Footer>
+</Modal>
             </div>
 
             {/* Custom CSS */}

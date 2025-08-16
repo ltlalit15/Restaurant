@@ -199,7 +199,7 @@ const Tables = () => {
 
   const [groupTables, setGroupTables] = useState([
     {
-      id: 13,
+      id: 1,
       name: "Large Table 1",
       type: "Large Table",
       seats: 8,
@@ -208,7 +208,7 @@ const Tables = () => {
       order: null,
     },
     {
-      id: 14,
+      id: 2,
       name: "Large Table 2",
       type: "Large Table",
       seats: 8,
@@ -217,7 +217,7 @@ const Tables = () => {
       order: null,
     },
     {
-      id: 15,
+      id: 3,
       name: "Large Table 3",
       type: "Large Table",
       seats: 8,
@@ -519,21 +519,21 @@ const Tables = () => {
             width: "120px",
             height: "60px",
             borderRadius: "8px",
-            backgroundColor: "#2d5016",
+            backgroundColor: "#ffffffff",
           }}
         >
           <div
             style={{
               position: "absolute",
-              top: "2px",
+              top: "",
               left: "50%",
               transform: "translateX(-50%)",
-              fontSize: "10px",
+              fontSize: "14px",
               fontWeight: "bold",
-              color: "white",
+              // color: "white",
             }}
           >
-            {table.name}
+            {table.id}
           </div>
           <div
             style={{
@@ -544,7 +544,7 @@ const Tables = () => {
               marginTop: "15px",
             }}
           >
-            {[...Array(6)].map((_, i) => (
+            {/* {[...Array(6)].map((_, i) => (
               <div
                 key={i}
                 style={{
@@ -554,7 +554,7 @@ const Tables = () => {
                   borderRadius: "50%",
                 }}
               ></div>
-            ))}
+            ))} */}
           </div>
         </div>
       );
@@ -582,10 +582,10 @@ const Tables = () => {
               transform: "translateX(-50%)",
               fontSize: "10px",
               fontWeight: "bold",
-              color: "white",
+              // color: "white",
             }}
           >
-            {table.name}
+            {table.id}
           </div>
           <div
             style={{
@@ -596,7 +596,7 @@ const Tables = () => {
               marginTop: "20px",
             }}
           >
-            {[...Array(6)].map((_, i) => (
+            {/* {[...Array(6)].map((_, i) => (
               <div
                 key={i}
                 style={{
@@ -606,7 +606,7 @@ const Tables = () => {
                   borderRadius: "50%",
                 }}
               ></div>
-            ))}
+            ))} */}
           </div>
         </div>
       );
@@ -660,17 +660,17 @@ const Tables = () => {
         onClick={handleClick}
         style={{
           ...baseStyle,
-          width: "80px",
-          height: "80px",
+          width: "70px",
+          height: "70px",
           borderRadius: "50%",
-          backgroundColor: "#8b4513",
+          // backgroundColor: "#e7e3e0ff",
         }}
       >
         <div
           style={{
             fontSize: "12px",
             fontWeight: "bold",
-            color: "white",
+            // color: "white",
           }}
         >
           {table.name}
@@ -688,33 +688,33 @@ const Tables = () => {
           {[...Array(4)].map((_, i) => (
             <div
               key={i}
-              style={{
-                position: "absolute",
-                width: "15px",
-                height: "15px",
-                backgroundColor: "#654321",
-                borderRadius: "50%",
-                ...(i === 0 && {
-                  top: "-7px",
-                  left: "50%",
-                  transform: "translateX(-50%)",
-                }),
-                ...(i === 1 && {
-                  right: "-7px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                }),
-                ...(i === 2 && {
-                  bottom: "-7px",
-                  left: "50%",
-                  transform: "translateX(-50%)",
-                }),
-                ...(i === 3 && {
-                  left: "-7px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                }),
-              }}
+              // style={{
+              //   position: "absolute",
+              //   width: "15px",
+              //   height: "15px",
+              //   backgroundColor: "#654321",
+              //   borderRadius: "50%",
+              //   ...(i === 0 && {
+              //     top: "-7px",
+              //     left: "50%",
+              //     transform: "translateX(-50%)",
+              //   }),
+              //   ...(i === 1 && {
+              //     right: "-7px",
+              //     top: "50%",
+              //     transform: "translateY(-50%)",
+              //   }),
+              //   ...(i === 2 && {
+              //     bottom: "-7px",
+              //     left: "50%",
+              //     transform: "translateX(-50%)",
+              //   }),
+              //   ...(i === 3 && {
+              //     left: "-7px",
+              //     top: "50%",
+              //     transform: "translateY(-50%)",
+              //   }),
+              // }}
             ></div>
           ))}
         </div>
@@ -746,7 +746,7 @@ const Tables = () => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "#8b4513",
+          // backgroundColor: "#8b4513",
           position: "relative",
           margin: "20px",
           cursor: "pointer",
@@ -759,13 +759,13 @@ const Tables = () => {
       >
         <div
           style={{
-            fontSize: "12px",
+            fontSize: "14px",
             fontWeight: "bold",
-            color: "white",
+            // color: "white",
             textAlign: "center",
           }}
         >
-          {table.name}
+          {table.id}
         </div>
         <div
           style={{
@@ -777,7 +777,7 @@ const Tables = () => {
             height: "100%",
           }}
         >
-          {[...Array(table.seats || 8)].map((_, i) => {
+          {/* {[...Array(table.seats || 8)].map((_, i) => {
             const angle = (i / (table.seats || 8)) * 2 * Math.PI;
             const radius = 60;
             const x = Math.cos(angle) * radius;
@@ -798,7 +798,7 @@ const Tables = () => {
                 }}
               ></div>
             );
-          })}
+          })} */}
         </div>
       </div>
     );
@@ -1184,9 +1184,9 @@ const Tables = () => {
                       fontWeight: "bold",
                     }}
                   >
-                    Table Name
+                    {/* Table Name */}
                   </label>
-                  <input
+                  {/* <input
                     type="text"
                     name="name"
                     value={tableForm.name}
@@ -1200,7 +1200,7 @@ const Tables = () => {
                       borderRadius: "4px",
                       boxSizing: "border-box",
                     }}
-                  />
+                  /> */}
                 </div>
 
                 <div style={{ marginBottom: "15px" }}>

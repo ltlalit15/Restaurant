@@ -1,39 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import './TableManagement.css';
 
-const TableManagement = ({  onJumpToOrders, onSelectTable }) => {
+const TableManagement = ({ onJumpToOrders, onSelectTable }) => {
   // State management
-  const [activeTab, setActiveTab] = useState('tables');
+  const [activeTab, setActiveTab] = useState('Restaurant');
   const [quickJumpInput, setQuickJumpInput] = useState('');
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [showPanel, setShowPanel] = useState(!isMobile);
 
+  const categories = ['Restaurant', 'Coffee shop', 'Terrace', 'Smoking area'];
+
   const tables = [
-    { id: 1, status: 'occupied', guests: 4, order: 'Order #1234' },
-    { id: 2, status: 'available', guests: 0, order: null },
-    { id: 3, status: 'occupied', guests: 2, order: 'Order #1235' },
-    { id: 4, status: 'available', guests: 0, order: null },
-    { id: 5, status: 'reserved', guests: 6, order: null },
-    { id: 6, status: 'occupied', guests: 3, order: 'Order #1236' },
-    { id: 7, status: 'available', guests: 0, order: null },
-    { id: 8, status: 'available', guests: 0, order: null },
-    { id: 9, status: 'occupied', guests: 2, order: 'Order #1237' },
-    { id: 10, status: 'available', guests: 0, order: null },
-    { id: 11, status: 'available', guests: 0, order: null },
-    { id: 12, status: 'occupied', guests: 5, order: 'Order #1238' },
-    // Pool tables
-    { id: 101, type: 'pool', status: 'occupied', guests: 2, order: 'Order #P101' },
-    { id: 102, type: 'pool', status: 'available', guests: 0, order: null },
-    { id: 103, type: 'pool', status: 'reserved', guests: 4, order: null },
-    { id: 104, type: 'pool', status: 'reserved', guests: 4, order: null },
-    { id: 105, type: 'pool', status: 'reserved', guests: 4, order: null },
-    { id: 106, type: 'pool', status: 'reserved', guests: 4, order: null },
-
-
-
-
+    { id: 1, status: 'occupied', guests: 4, order: 'Order #1234', category: 'Restaurant' },
+    { id: 2, status: 'available', guests: 0, order: null, category: 'Restaurant' },
+    { id: 3, status: 'occupied', guests: 2, order: 'Order #1235', category: 'Restaurant' },
+    { id: 4, status: 'available', guests: 0, order: null, category: 'Restaurant' },
+    { id: 5, status: 'reserved', guests: 6, order: null, category: 'Terrace' },
+    { id: 6, status: 'occupied', guests: 3, order: 'Order #1236', category: 'Terrace' },
+    { id: 7, status: 'available', guests: 0, order: null, category: 'Coffee shop' },
+    { id: 8, status: 'available', guests: 0, order: null, category: 'Coffee shop' },
+    { id: 9, status: 'occupied', guests: 2, order: 'Order #1237', category: 'Smoking area' },
+    { id: 10, status: 'available', guests: 0, order: null, category: 'Smoking area' },
+    { id: 11, status: 'available', guests: 0, order: null, category: 'Smoking area' },
+    { id: 12, status: 'occupied', guests: 5, order: 'Order #1238', category: 'Restaurant' },
+    // Pool tables (only restaurant zone example)
+    { id: 101, type: 'pool', status: 'occupied', guests: 2, order: 'Order #P101', category: 'Restaurant' },
+    { id: 102, type: 'pool', status: 'available', guests: 0, order: null, category: 'Restaurant' },
+    { id: 103, type: 'pool', status: 'reserved', guests: 4, order: null, category: 'Restaurant' },
   ];
-
 
   useEffect(() => {
     const handleResize = () => {
@@ -63,120 +57,102 @@ const TableManagement = ({  onJumpToOrders, onSelectTable }) => {
   };
 
   const renderTable = (table) => {
-    const statusColor = table.status === 'occupied' ? '#4CAF50' :
-      table.status === 'reserved' ? '#FFC107' : '#9E9E9E';
+  const statusColor =
+    table.status === 'occupied' ? '#4CAF50' :
+    table.status === 'reserved' ? '#FFC107' : '#9E9E9E';
 
-    if (table.type === 'pool') {
-      return (
-        <div
-          key={table.id}
-          id={`table-${table.id}`}
-          className="pool-table "
-          style={{ borderColor: statusColor }}
-        >
-          <div className="pool-table-inner">
-            <span>{table.id}</span>
-            <div className="pool-table-holes">
-              <div className="pool-hole"></div>
-              <div className="pool-hole"></div>
-              <div className="pool-hole"></div>
-              <div className="pool-hole"></div>
-              <div className="pool-hole"></div>
-              <div className="pool-hole"></div>
-            </div>
-          </div>
-        </div>
-      );
-    }
+  // Restaurant → Round tables
+  const isRestaurant = activeTab === 'Restaurant';
 
+  if (table.type === 'pool') {
     return (
       <div
         key={table.id}
         id={`table-${table.id}`}
-        className="restaurant-table"
+        className="pool-table"
         style={{ borderColor: statusColor }}
       >
-        <div className="table-number">{table.id}</div>
-        <div className="table-status" style={{ backgroundColor: statusColor }}></div>
-        <div className="table-chairs">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="table-chair"></div>
-          ))}
+        <div className="pool-table-inner">
+          <span>{table.id}</span>
+          <div className="pool-table-holes">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="pool-hole"></div>
+            ))}
+          </div>
         </div>
       </div>
     );
-  };
+  }
+
+  return (
+    <div
+      key={table.id}
+      id={`table-${table.id}`}
+      className={`restaurant-table ${isRestaurant ? 'round-table ' : ''}`}
+      style={{ borderColor: statusColor }}
+    >
+      <div className="table-number">{table.id}</div>
+      {/* <div className="table-status" style={{ backgroundColor: statusColor }}></div> */}
+      <div className="table-chairs">
+        {/* {[...Array(4)].map((_, i) => (
+          <div key={i} className="table-chair"></div>
+        ))} */}
+      </div>
+    </div>
+  );
+};
+
 
   return (
     <div className="table-management-container">
-      {/* Header */}
-
-
-      {/* Main Content */}
       <div className="main-content">
-        {/* Floor Plan */}
         <div className="floor-plan">
-          {/* Kitchen Area */}
+          {/* Kitchen + Tabs */}
           <div className="kitchen-area">
-            <div className="kitchen-equipment fw-bold text-dark ">KITCHEN</div>
+            <div className="kitchen-equipment fw-bold text-dark">
+              KITCHEN
+              <div className="tab-container mt-2">
+                <div className="d-flex flex-column gap-2">
+                  {categories.map((tab) => (
+                    <button
+                      key={tab}
+                      className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
+                      onClick={() => setActiveTab(tab)}
+                    >
+                      {tab}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
             <div className="kitchen-storage fw-bold text-dark">KITCHEN STORAGE</div>
           </div>
 
-          {/* Dining Area */}
+          {/* Dining Area (changes with tab) */}
           <div className="dining-area">
-
-
-
-            <div className='d-flex flex-wrap justify-content-center align-items-center gap-5 mb-3'>
-
-              {/* Large Oval Table */}
-              <div className="large-table ">
-                13
-                <div className="large-table-chairs">
-                  {[...Array(8)].map((_, i) => (
-                    <div key={i} className="large-table-chair"></div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Large Oval Table */}
-              <div className="large-table">
-                14
-                <div className="large-table-chairs">
-                  {[...Array(8)].map((_, i) => (
-                    <div key={i} className="large-table-chair"></div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Large Oval Table */}
-              <div className="large-table ">
-                15
-                <div className="large-table-chairs">
-                  {[...Array(8)].map((_, i) => (
-                    <div key={i} className="large-table-chair"></div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            <h3 className="text-center mb-3">{activeTab}</h3>
 
             {/* Regular Tables */}
             <div className="tables-grid">
-              {tables.filter(t => !t.type).map(renderTable)}
+              {tables.filter((t) => t.category === activeTab && !t.type).map(renderTable)}
             </div>
 
-            {/* Pool Tables */}
-            <div className="pool-tables-area ">
-              <div className="pool-tables-label">POOL ZONE</div>
-              <div className="pool-tables-grid ">
-                {tables.filter(t => t.type === 'pool').map(renderTable)}
+            {/* Pool Tables only for Restaurant */}
+            {activeTab === 'Restaurant' && (
+              <div className="pool-tables-area">
+                <div className="pool-tables-label">POOL ZONE</div>
+                <div className="pool-tables-grid">
+                  {tables.filter((t) => t.category === activeTab && t.type === 'pool').map(renderTable)}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Bar Area */}
-            <div className="bar-area">
-              <div className="bar-counter">DRINKING ZONE</div>
-            </div>
+            {activeTab === 'Restaurant' && (
+              <div className="bar-area">
+                <div className="bar-counter">DRINKING ZONE</div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -193,10 +169,10 @@ const TableManagement = ({  onJumpToOrders, onSelectTable }) => {
                 onKeyPress={(e) => e.key === 'Enter' && handleJump()}
               />
               <div className="number-pad">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map(num => (
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((num) => (
                   <button
                     key={num}
-                    onClick={() => setQuickJumpInput(prev => prev + num.toString())}
+                    onClick={() => setQuickJumpInput((prev) => prev + num.toString())}
                   >
                     {num}
                   </button>
@@ -205,31 +181,22 @@ const TableManagement = ({  onJumpToOrders, onSelectTable }) => {
               <div className="action-buttons">
                 <button
                   className="back-btn"
-                  onClick={() => setQuickJumpInput(prev => prev.slice(0, -1))}
+                  onClick={() => setQuickJumpInput((prev) => prev.slice(0, -1))}
                 >
                   ← Back
                 </button>
-
-
-
                 <button
                   className="jump-btn"
                   onClick={() => {
                     handleJump();
-                    if (onSelectTable) {
-                      onSelectTable(quickJumpInput); // number parent ko bhej do
-                    }
-                    if (onJumpToOrders) {
-                      onJumpToOrders(); // register tab me le jao
-                    }
+                    if (onSelectTable) onSelectTable(quickJumpInput);
+                    if (onJumpToOrders) onJumpToOrders();
                   }}
-
                 >
                   Jump
                 </button>
-
-
               </div>
+
               <div className="status-legend">
                 <h3>Table Status</h3>
                 <div className="legend-item">
@@ -247,22 +214,15 @@ const TableManagement = ({  onJumpToOrders, onSelectTable }) => {
               </div>
             </div>
             {isMobile && (
-              <button
-                className="close-panel-btn"
-                onClick={() => setShowPanel(false)}
-              >
+              <button className="close-panel-btn" onClick={() => setShowPanel(false)}>
                 Close Panel
               </button>
             )}
           </div>
         )}
 
-        {/* Mobile Toggle Button */}
         {!showPanel && isMobile && (
-          <button
-            className="show-panel-btn"
-            onClick={() => setShowPanel(true)}
-          >
+          <button className="show-panel-btn" onClick={() => setShowPanel(true)}>
             Show Panel
           </button>
         )}

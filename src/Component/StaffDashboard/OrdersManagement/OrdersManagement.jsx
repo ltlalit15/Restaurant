@@ -1278,6 +1278,8 @@ const OrdersManagement = () => {
 
                 {/* Action Buttons */}
                 <div className="d-flex gap-2">
+
+                  {  orderType === 'dineIn'  &&
                   <button
                     onClick={() => {
                       setActiveTab('tables');
@@ -1289,6 +1291,7 @@ const OrdersManagement = () => {
                   >
                     New
                   </button>
+}
                   <button
                     onClick={() => setOrderItems([])}
                     className="btn btn-danger btn-sm flex-grow-1"
@@ -1352,27 +1355,35 @@ const OrdersManagement = () => {
 
               {/* Product Grid */}
               <div className="flex-grow-1 p-3 overflow-auto">
-                <div className="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
-                  {filteredProducts.map((product) => (
-                    <div
-                      key={product.id}
-                      onClick={() => addToOrder(product)}
-                      className="col"
-                    >
-                      <div className="card h-100 cursor-pointer hover-shadow border-0">
-                        <div className="card-body text-center d-flex flex-column justify-content-center">
-                          <h5 className="card-title mb-1">{product.name}</h5>
-                          <p className="h5 text-warning mb-0">${product.price.toFixed(2)}</p>
-                          <p className="small text-muted mt-1">
-                            <i className="fa fa-plus-circle mr-1"></i>
-                            Select options
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+  <div className="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
+    {filteredProducts.map((product) => (
+      <div key={product.id} className="col">
+        <div className="card h-100 cursor-pointer hover-shadow border-0">
+          <div className="card-body text-center d-flex flex-column justify-content-center">
+            <h5 className="card-title mb-1">{product.name}</h5>
+            <p className="h5 text-warning mb-0">${product.price.toFixed(2)}</p>
+            <p className="small text-muted mt-1">
+              <i className="fa fa-plus-circle mr-1"></i>
+              Select options
+            </p>
+
+            {/* ✅ Conditional rendering based on selectedTable */}
+            {selectedTable ? (
+              <button
+                className="btn btn-primary mt-2"
+                onClick={() => addToOrder(product)}
+              >
+                Add to Order
+              </button>
+            ) : (
+              <span className="text-muted mt-2">Select a table</span>
+            )}
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
             </div>
           </div>
         )}

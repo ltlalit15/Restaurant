@@ -615,6 +615,7 @@ import { useNavigate } from 'react-router-dom';
 const TablesManagement = () => {
   
     const navigate = useNavigate()
+const [showFoodModal, setShowFoodModal] = useState(false);
 
     // State declarations
     const [showTableModal, setShowTableModal] = useState(false);
@@ -671,16 +672,16 @@ const [showToggleConfirm, setShowToggleConfirm] = useState(false);
             lightOn: true,
             customer: 'Jane Smith'
         },
-        {
-            id: 'R1',
-            name: 'Table R1',
-            type: 'restaurant',
-            status: 'free',
-            sessionTime: '00:00:00',
-            currentBill: '$0.00',
-            lightOn: false,
-            customer: null
-        },
+        // {
+        //     id: 'R1',
+        //     name: 'Table R1',
+        //     type: 'restaurant',
+        //     status: 'free',
+        //     sessionTime: '00:00:00',
+        //     currentBill: '$0.00',
+        //     lightOn: false,
+        //     customer: null
+        // },
         {
             id: 'S2',
             name: 'Table S2',
@@ -711,16 +712,16 @@ const [showToggleConfirm, setShowToggleConfirm] = useState(false);
             lightOn: false,
             customer: null
         },
-        {
-            id: 'R2',
-            name: 'Table R2',
-            type: 'restaurant',
-            status: 'running',
-            sessionTime: '03:22:45',
-            currentBill: '$67.50',
-            lightOn: true,
-            customer: 'Sarah Williams'
-        }
+        // {
+        //     id: 'R2',
+        //     name: 'Table R2',
+        //     type: 'restaurant',
+        //     status: 'running',
+        //     sessionTime: '03:22:45',
+        //     currentBill: '$67.50',
+        //     lightOn: true,
+        //     customer: 'Sarah Williams'
+        // }
     ]);
 
     // Handler for table click
@@ -1017,45 +1018,31 @@ const [showToggleConfirm, setShowToggleConfirm] = useState(false);
 
                 {/* Filter Bar */}
                 <div className="mt-3">
-                    <div className="d-flex align-items-center justify-content-between flex-wrap gap-3">
-                        <div className="d-flex align-items-center gap-2 gap-md-3 flex-wrap">
-                            {/* Table Type Filter */}
-                            <div className="position-relative">
-                                <select
-                                    id="tableTypeFilter"
-                                    className="form-select pe-5"
-                                    value={tableTypeFilter}
-                                    onChange={(e) => setTableTypeFilter(e.target.value)}
-                                >
-                                    <option value="all">All Tables</option>
-                                    <option value="snooker">Snooker</option>
-                                    <option value="pool">Pool</option>
-                                    <option value="playstation">PlayStation</option>
-                                    <option value="restaurant">Restaurant</option>
-                                </select>
-                            </div>
-                        </div>
+                  <div className="d-flex gap-2 flex-wrap">
+        {["All", "Pool", "Playstation", "Snooker", "TV"].map((type) => (
+          <button
+            key={type}
+            type="button"
+            onClick={() => setTableTypeFilter(type.toLowerCase())}
+          className={`px-3 py-1 border fw-medium ${
+  tableTypeFilter === type.toLowerCase()
+    ? "border-dark text-dark rounded"
+    : "border-secondary text-muted rounded"
+}`}
 
-                        {/* Stats */}
-                        <div className="d-flex align-items-center gap-3 gap-md-4 flex-wrap">
-                            <div className="text-center">
-                                <p className="mb-0 h4 fw-bold">{tables.length}</p>
-                                <p className="mb-0 small text-muted">Total Tables</p>
-                            </div>
-                            <div className="text-center">
-                                <p className="mb-0 h4 fw-bold text-success">
-                                    {tables.filter(t => t.status === 'running').length}
-                                </p>
-                                <p className="mb-0 small text-muted">Running</p>
-                            </div>
-                            <div className="text-center">
-                                <p className="mb-0 h4 fw-bold text-success">
-                                    {tables.filter(t => t.status === 'free').length}
-                                </p>
-                                <p className="mb-0 small text-muted">Available</p>
-                            </div>
-                        </div>
-                    </div>
+
+             style={{
+          backgroundColor:
+            tableTypeFilter === type.toLowerCase() ? "#facc15" : "transparent",
+          minWidth: "110px",
+          textAlign: "center",
+          borderWidth: "2px",
+        }}
+          >
+            {type}
+          </button>
+        ))}
+      </div>
                 </div>
 
                 {/* Tables Content */}
@@ -1096,6 +1083,20 @@ const [showToggleConfirm, setShowToggleConfirm] = useState(false);
                                                             <span className="small text-muted">Time</span>
                                                             <span className="font-monospace fw-bold small">{table.sessionTime}</span>
                                                         </div>
+<div className="mt-2 text-center mb-2 w-80">
+  <button
+    type="button"
+    className="btn btn-sm btn-primary"
+    onClick={(e) => {
+      e.stopPropagation(); // Prevents table card click
+      setSelectedTable(table); // ✅ Ensure table is tracked
+      setShowFoodModal(true);  // ✅ Open food modal
+    }}
+  >
+    🍽 Order Food
+  </button>
+</div>
+
                                                     </>
                                                 ) : (
                                                     <div className="text-center py-2 py-md-3">
@@ -1324,7 +1325,7 @@ const [showToggleConfirm, setShowToggleConfirm] = useState(false);
 
 
 
-                // Add a new modal for confirmation (similar to close session modal):
+                {/*  Add a new modal for confirmation (similar to close session modal): */}
 <Modal show={showToggleConfirm} onHide={() => setShowToggleConfirm(false)}>
     <Modal.Header closeButton>
         <Modal.Title>
@@ -1346,6 +1347,41 @@ const [showToggleConfirm, setShowToggleConfirm] = useState(false);
         </Button>
     </Modal.Footer>
 </Modal>
+
+
+{/* Food Order Modal */}
+<Modal
+  show={showFoodModal}
+  onHide={() => setShowFoodModal(false)}
+  centered
+>
+  <Modal.Header closeButton>
+    <Modal.Title>Order Food</Modal.Title>
+  </Modal.Header>
+  <Modal.Body>
+    {/* Food menu UI */}
+    {renderMenuItems()}
+  </Modal.Body>
+  <Modal.Footer>
+    <Button variant="secondary" onClick={() => setShowFoodModal(false)}>
+      Cancel
+    </Button>
+    <Button
+      variant="primary"
+      onClick={() => {
+        if (selectedItems.length === 0) {
+          alert("Please select at least one item to order.");
+          return;
+        }
+        navigate("/staff/ordermanagement");
+        setShowFoodModal(false);
+      }}
+    >
+      Place Order
+    </Button>
+  </Modal.Footer>
+</Modal>
+
             </div>
 
             {/* Custom CSS */}

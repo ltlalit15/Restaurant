@@ -24,9 +24,9 @@ const TableManagement = ({ onJumpToOrders, onSelectTable }) => {
     { id: 11, status: 'available', guests: 0, order: null, category: 'Smoking area' },
     { id: 12, status: 'occupied', guests: 5, order: 'Order #1238', category: 'Restaurant' },
     // Pool tables (only restaurant zone example)
-    { id: 101, type: 'pool', status: 'occupied', guests: 2, order: 'Order #P101', category: 'Restaurant' },
-    { id: 102, type: 'pool', status: 'available', guests: 0, order: null, category: 'Restaurant' },
-    { id: 103, type: 'pool', status: 'reserved', guests: 4, order: null, category: 'Restaurant' },
+    // { id: 101, type: 'pool', status: 'occupied', guests: 2, order: 'Order #P101', category: 'Restaurant' },
+    // { id: 102, type: 'pool', status: 'available', guests: 0, order: null, category: 'Restaurant' },
+    // { id: 103, type: 'pool', status: 'reserved', guests: 4, order: null, category: 'Restaurant' },
   ];
 
   useEffect(() => {
@@ -140,10 +140,10 @@ const TableManagement = ({ onJumpToOrders, onSelectTable }) => {
             {/* Pool Tables only for Restaurant */}
             {activeTab === 'Restaurant' && (
               <div className="pool-tables-area">
-                <div className="pool-tables-label">POOL ZONE</div>
+                {/* <div className="pool-tables-label">POOL ZONE</div>
                 <div className="pool-tables-grid">
                   {tables.filter((t) => t.category === activeTab && t.type === 'pool').map(renderTable)}
-                </div>
+                </div> */}
               </div>
             )}
 

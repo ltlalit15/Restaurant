@@ -673,7 +673,7 @@ const Tables = () => {
             // color: "white",
           }}
         >
-          {table.name}
+          {table.id}
         </div>
         <div
           style={{

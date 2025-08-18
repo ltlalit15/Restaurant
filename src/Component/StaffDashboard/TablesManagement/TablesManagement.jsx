@@ -611,18 +611,19 @@ import { RiDashboardLine, RiTableLine, RiBarChartLine, RiSettingsLine, RiUserLin
 import { FaPlaystation } from 'react-icons/fa';
 import { Modal, Button, Form } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import MemberSelect from './MemberSelect';
 
 const TablesManagement = () => {
-  
+
     const navigate = useNavigate()
-const [showFoodModal, setShowFoodModal] = useState(false);
+    const [showFoodModal, setShowFoodModal] = useState(false);
 
     // State declarations
     const [showTableModal, setShowTableModal] = useState(false);
     const [selectedTable, setSelectedTable] = useState(null);
     const [showCloseConfirm, setShowCloseConfirm] = useState(false);
     const [confirmToggleTable, setConfirmToggleTable] = useState(null);
-const [showToggleConfirm, setShowToggleConfirm] = useState(false);
+    const [showToggleConfirm, setShowToggleConfirm] = useState(false);
 
     const [members, setMembers] = useState([
         { id: 1, name: 'John Doe', discount: 10 },
@@ -641,6 +642,10 @@ const [showToggleConfirm, setShowToggleConfirm] = useState(false);
     const [currentTime, setCurrentTime] = useState('');
     const [tableTypeFilter, setTableTypeFilter] = useState('all');
     const [viewMode, setViewMode] = useState('grid');
+    const [timeLimit, setTimeLimit] = useState();  // in minutes
+    const [amount, setAmount] = useState();        // in $
+    const hourlyRate = 10; // Example: 1 hour = $10
+
     const [tables, setTables] = useState([
         {
             id: 'S1',
@@ -754,7 +759,7 @@ const [showToggleConfirm, setShowToggleConfirm] = useState(false);
     // Start new session
     const startNewSession = () => {
         if (selectedTable.type === 'restaurant' && selectedItems.length === 0) {
-           navigate("/staff/ordermanagement")
+            navigate("/staff/ordermanagement")
             return;
         }
 
@@ -919,26 +924,13 @@ const [showToggleConfirm, setShowToggleConfirm] = useState(false);
 
     // Render member select dropdown
     const renderMemberSelect = () => (
-        <Form.Group className="mb-3">
-            <Form.Label>Select Customer</Form.Label>
-            <Form.Select
-                value={selectedMember ? selectedMember.id : ''}
-                onChange={e => {
-                    const memberId = Number(e.target.value);
-                    const member = members.find(m => m.id === memberId);
-                    setSelectedMember(member);
-                }}
-            >
-                <option value="">Select Customer</option>
-                {members.map(m => (
-                    <option key={m.id} value={m.id}>
-                        {m.name} ({m.discount}%)
-                    </option>
-                ))}
-            </Form.Select>
-        </Form.Group>
+        <MemberSelect
+            members={members}
+            selectedMember={selectedMember}
+            setSelectedMember={setSelectedMember}
+            setMembers={setMembers}
+        />
     );
-
     // Render menu items for restaurant
     const renderMenuItems = () => (
         <div className="mb-3">
@@ -1018,31 +1010,30 @@ const [showToggleConfirm, setShowToggleConfirm] = useState(false);
 
                 {/* Filter Bar */}
                 <div className="mt-3">
-                  <div className="d-flex gap-2 flex-wrap">
-        {["All", "Pool", "Playstation", "Snooker", "TV"].map((type) => (
-          <button
-            key={type}
-            type="button"
-            onClick={() => setTableTypeFilter(type.toLowerCase())}
-          className={`px-3 py-1 border fw-medium ${
-  tableTypeFilter === type.toLowerCase()
-    ? "border-dark text-dark rounded"
-    : "border-secondary text-muted rounded"
-}`}
+                    <div className="d-flex gap-2 flex-wrap">
+                        {["All", "Pool", "Playstation", "Snooker", "TV"].map((type) => (
+                            <button
+                                key={type}
+                                type="button"
+                                onClick={() => setTableTypeFilter(type.toLowerCase())}
+                                className={`px-3 py-1 border fw-medium ${tableTypeFilter === type.toLowerCase()
+                                    ? "border-dark text-dark rounded"
+                                    : "border-secondary text-muted rounded"
+                                    }`}
 
 
-             style={{
-          backgroundColor:
-            tableTypeFilter === type.toLowerCase() ? "#facc15" : "transparent",
-          minWidth: "110px",
-          textAlign: "center",
-          borderWidth: "2px",
-        }}
-          >
-            {type}
-          </button>
-        ))}
-      </div>
+                                style={{
+                                    backgroundColor:
+                                        tableTypeFilter === type.toLowerCase() ? "#facc15" : "transparent",
+                                    minWidth: "110px",
+                                    textAlign: "center",
+                                    borderWidth: "2px",
+                                }}
+                            >
+                                {type}
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
                 {/* Tables Content */}
@@ -1083,19 +1074,19 @@ const [showToggleConfirm, setShowToggleConfirm] = useState(false);
                                                             <span className="small text-muted">Time</span>
                                                             <span className="font-monospace fw-bold small">{table.sessionTime}</span>
                                                         </div>
-<div className="mt-2 text-center mb-2 w-80">
-  <button
-    type="button"
-    className="btn btn-sm btn-primary"
-    onClick={(e) => {
-      e.stopPropagation(); // Prevents table card click
-      setSelectedTable(table); // ✅ Ensure table is tracked
-      setShowFoodModal(true);  // ✅ Open food modal
-    }}
-  >
-    🍽 Order Food
-  </button>
-</div>
+                                                        <div className="mt-2 text-center mb-2 w-80">
+                                                            <button
+                                                                type="button"
+                                                                className="btn btn-sm btn-primary"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation(); // Prevents table card click
+                                                                    setSelectedTable(table); // ✅ Ensure table is tracked
+                                                                    setShowFoodModal(true);  // ✅ Open food modal
+                                                                }}
+                                                            >
+                                                                🍽 Order
+                                                            </button>
+                                                        </div>
 
                                                     </>
                                                 ) : (
@@ -1107,20 +1098,20 @@ const [showToggleConfirm, setShowToggleConfirm] = useState(false);
 
                                             <div className="d-grid gap-1 gap-md-2">
                                                 <div className="d-flex gap-1">
-                                                <button
-    className={`btn btn-sm flex-grow-1 ${table.status === 'running' ? 'btn-danger' : 'btn-success'}`}
-    onClick={(e) => {
-        e.stopPropagation();
-        setConfirmToggleTable(table);
-        setShowToggleConfirm(true);
-    }}
->
-    {table.status === 'running' ? (
-        <RiStopLine className="fs-6" />
-    ) : (
-        <RiPlayLine className="fs-6" />
-    )}
-</button>
+                                                    <button
+                                                        className={`btn btn-sm flex-grow-1 ${table.status === 'running' ? 'btn-danger' : 'btn-success'}`}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setConfirmToggleTable(table);
+                                                            setShowToggleConfirm(true);
+                                                        }}
+                                                    >
+                                                        {table.status === 'running' ? (
+                                                            <RiStopLine className="fs-6" />
+                                                        ) : (
+                                                            <RiPlayLine className="fs-6" />
+                                                        )}
+                                                    </button>
 
 
                                                     <button
@@ -1272,8 +1263,45 @@ const [showToggleConfirm, setShowToggleConfirm] = useState(false);
                                 </h5>
 
                                 {renderMemberSelect()}
-
                                 {selectedTable?.type === 'restaurant' && renderMenuItems()}
+
+                                {/* Time/Money Inputs */}
+                                {selectedTable?.type !== 'restaurant' && (
+                                    <div className="mb-3">
+                                        <label className="form-label">Set Time Limit (minutes)</label>
+                                        <input
+                                            type="number"
+                                            className="form-control"
+                                            value={timeLimit}
+                                            onChange={(e) => {
+                                                const minutes = Number(e.target.value);
+                                                setTimeLimit(minutes);
+                                                setAmount((minutes / 60) * hourlyRate); // auto update money
+                                            }}
+                                            placeholder="Enter minutes"
+                                        />
+
+                                        <label className="form-label mt-3">Or Set by Amount ($)</label>
+                                        <input
+                                            type="number"
+                                            className="form-control"
+                                            value={amount}
+                                            onChange={(e) => {
+                                                const money = Number(e.target.value);
+                                                setAmount(money);
+                                                setTimeLimit((money / hourlyRate) * 60); // auto update minutes
+                                            }}
+                                            placeholder="Enter amount"
+                                        />
+
+                                        {/* Preview */}
+                                        <div className="mt-2">
+                                            <small>
+                                                {timeLimit} minutes = ${amount}
+                                            </small>
+                                        </div>
+                                    </div>
+                                )}
 
                                 <Button
                                     variant="success"
@@ -1283,6 +1311,7 @@ const [showToggleConfirm, setShowToggleConfirm] = useState(false);
                                     {selectedTable?.type === 'restaurant' ? 'Start Order' : 'Start Session'}
                                 </Button>
                             </>
+
                         )}
                     </Modal.Body>
                 </Modal>
@@ -1326,61 +1355,61 @@ const [showToggleConfirm, setShowToggleConfirm] = useState(false);
 
 
                 {/*  Add a new modal for confirmation (similar to close session modal): */}
-<Modal show={showToggleConfirm} onHide={() => setShowToggleConfirm(false)}>
-    <Modal.Header closeButton>
-        <Modal.Title>
-            {confirmToggleTable?.status === 'running' ? 'Confirm Stop Session' : 'Confirm Start Session'}
-        </Modal.Title>
-    </Modal.Header>
-    <Modal.Body>
-        Are you sure you want to {confirmToggleTable?.status === 'running' ? 'stop' : 'start'} the session for <strong>{confirmToggleTable?.name}</strong>?
-    </Modal.Body>
-    <Modal.Footer>
-        <Button variant="secondary" onClick={() => setShowToggleConfirm(false)}>
-            Cancel
-        </Button>
-        <Button variant={confirmToggleTable?.status === 'running' ? 'danger' : 'success'} onClick={() => {
-            toggleSession(confirmToggleTable.id, new Event('click'));
-            setShowToggleConfirm(false);
-        }}>
-            {confirmToggleTable?.status === 'running' ? 'Stop' : 'Start'}
-        </Button>
-    </Modal.Footer>
-</Modal>
+                <Modal show={showToggleConfirm} onHide={() => setShowToggleConfirm(false)}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>
+                            {confirmToggleTable?.status === 'running' ? 'Confirm Stop Session' : 'Confirm Start Session'}
+                        </Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        Are you sure you want to {confirmToggleTable?.status === 'running' ? 'stop' : 'start'} the session for <strong>{confirmToggleTable?.name}</strong>?
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={() => setShowToggleConfirm(false)}>
+                            Cancel
+                        </Button>
+                        <Button variant={confirmToggleTable?.status === 'running' ? 'danger' : 'success'} onClick={() => {
+                            toggleSession(confirmToggleTable.id, new Event('click'));
+                            setShowToggleConfirm(false);
+                        }}>
+                            {confirmToggleTable?.status === 'running' ? 'Stop' : 'Start'}
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
 
 
-{/* Food Order Modal */}
-<Modal
-  show={showFoodModal}
-  onHide={() => setShowFoodModal(false)}
-  centered
->
-  <Modal.Header closeButton>
-    <Modal.Title>Order Food</Modal.Title>
-  </Modal.Header>
-  <Modal.Body>
-    {/* Food menu UI */}
-    {renderMenuItems()}
-  </Modal.Body>
-  <Modal.Footer>
-    <Button variant="secondary" onClick={() => setShowFoodModal(false)}>
-      Cancel
-    </Button>
-    <Button
-      variant="primary"
-      onClick={() => {
-        if (selectedItems.length === 0) {
-          alert("Please select at least one item to order.");
-          return;
-        }
-        navigate("/staff/ordermanagement");
-        setShowFoodModal(false);
-      }}
-    >
-      Place Order
-    </Button>
-  </Modal.Footer>
-</Modal>
+                {/* Food Order Modal */}
+                <Modal
+                    show={showFoodModal}
+                    onHide={() => setShowFoodModal(false)}
+                    centered
+                >
+                    <Modal.Header closeButton>
+                        <Modal.Title>Order Food</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        {/* Food menu UI */}
+                        {renderMenuItems()}
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={() => setShowFoodModal(false)}>
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="primary"
+                            onClick={() => {
+                                if (selectedItems.length === 0) {
+                                    alert("Please select at least one item to order.");
+                                    return;
+                                }
+                                navigate("/staff/ordermanagement");
+                                setShowFoodModal(false);
+                            }}
+                        >
+                            Place Order
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
 
             </div>
 

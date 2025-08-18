@@ -5,6 +5,7 @@ const rateLimit = require('express-rate-limit');
 const dotenv = require('dotenv');
 const http = require('http');
 const socketIo = require('socket.io');
+// const { runMigrations } = require('./migrations/runMigrations.js');
 
 // Load environment variables
 dotenv.config();
@@ -109,9 +110,27 @@ app.use('*', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
+//  const startServer = async () => {
+//   try {
+//     console.log("🚀 Running migrations...");
+//     await runMigrations();   // ✅ safe to use await here
+
+//     server.listen(PORT, () => {
+//       console.log(`✅ Server running on port ${PORT}`);
+//     });
+
+//   } catch (err) {
+//     console.error("❌ Failed to start server:", err.message);
+//     process.exit(1);
+//   }
+// };
+
+// // Call the async function
+// startServer();
+
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV}`);
+  // console.log(`Environment: ${process.env.NODE_ENV}`);
 });
 
 module.exports = app;

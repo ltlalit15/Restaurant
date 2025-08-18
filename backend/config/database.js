@@ -5,13 +5,17 @@ dotenv.config();
 
 // Create connection pool
 const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+
+  host: "localhost",     // 👈 Localhost for local MySQL
+  port: 3306,            // 👈 Default MySQL port
+  user: "root",          // 👈 Your local MySQL username
+  password: "",          // 👈 Or your local MySQL password
+  database: "pos_restaurant_pool",                // Database Name
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
+  connectTimeout: 10000,
+  multipleStatements: true
 });
 
 // Get promise-based connection
@@ -32,3 +36,6 @@ const testConnection = async () => {
 testConnection();
 
 module.exports = promisePool;
+
+
+

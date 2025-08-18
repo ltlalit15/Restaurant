@@ -1,5 +1,5 @@
 const db = require('../config/database');
-const axios = require('axios');
+// const axios = require('axios'); // Uncomment when you have actual smart plug API endpoints
 
 // Get all smart plugs
 const getAllPlugs = async (req, res) => {
@@ -198,21 +198,11 @@ const controlPlugPower = async (req, res) => {
 
     const plug = plugs[0];
 
+    // Simulate smart plug control (replace with actual smart plug API)
     try {
-      // Call smart plug API
-      const response = await axios.post(`${process.env.PLUG_API_URL}/control`, {
-        plug_id: plug.plug_id,
-        ip_address: plug.ip_address,
-        mac_address: plug.mac_address,
-        action: action
-      }, {
-        headers: {
-          'Authorization': `Bearer ${process.env.PLUG_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        timeout: 10000
-      });
-
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
       // Update plug status in database
       await db.execute(
         'UPDATE smart_plugs SET power_state = ?, status = "online", updated_at = CURRENT_TIMESTAMP WHERE id = ?',
@@ -230,14 +220,14 @@ const controlPlugPower = async (req, res) => {
 
       res.json({
         success: true,
-        message: `Smart plug turned ${action} successfully`,
+        message: `Smart plug turned ${action} successfully (simulated)`,
         data: { 
           plug_id: plug.plug_id,
           power_state: action,
-          response: response.data
+          simulation: true
         }
       });
-    } catch (apiError) {
+    } catch (error) {
       // Update plug status to offline if API call fails
       await db.execute(
         'UPDATE smart_plugs SET status = "offline", updated_at = CURRENT_TIMESTAMP WHERE id = ?',
@@ -247,7 +237,7 @@ const controlPlugPower = async (req, res) => {
       res.status(400).json({
         success: false,
         message: 'Failed to control smart plug',
-        error: apiError.response?.data?.message || apiError.message
+        error: error.message
       });
     }
   } catch (error) {
@@ -279,22 +269,16 @@ const getPlugStatus = async (req, res) => {
 
     const plug = plugs[0];
 
+    // Simulate real-time status (replace with actual smart plug API)
     try {
-      // Call smart plug API to get real-time status
-      const response = await axios.get(`${process.env.PLUG_API_URL}/status/${plug.plug_id}`, {
-        headers: {
-          'Authorization': `Bearer ${process.env.PLUG_API_KEY}`
-        },
-        timeout: 5000
-      });
-
-      const apiStatus = response.data;
-
-      // Update database with real-time data
+      // Simulate random power consumption based on power state
+      const simulatedConsumption = plug.power_state === 'on' ? 
+        Math.floor(Math.random() * 200) + 50 : 0;
+      
+      // Update database with simulated data
       await db.execute(
-        `UPDATE smart_plugs SET status = ?, power_state = ?, power_consumption = ?, 
-         updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
-        [apiStatus.status, apiStatus.power_state, apiStatus.power_consumption, id]
+        `UPDATE smart_plugs SET power_consumption = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+        [simulatedConsumption, id]
       );
 
       res.json({
@@ -302,14 +286,14 @@ const getPlugStatus = async (req, res) => {
         data: {
           plug_id: plug.plug_id,
           name: plug.name,
-          status: apiStatus.status,
-          power_state: apiStatus.power_state,
-          power_consumption: apiStatus.power_consumption,
-          last_updated: new Date().toISOString()
+          status: plug.status,
+          power_state: plug.power_state,
+          power_consumption: simulatedConsumption,
+          last_updated: new Date().toISOString(),
+          simulation: true
         }
       });
-    } catch (apiError) {
-      // Return database status if API call fails
+    } catch (error) {
       res.json({
         success: true,
         data: {
@@ -319,7 +303,7 @@ const getPlugStatus = async (req, res) => {
           power_state: plug.power_state,
           power_consumption: plug.power_consumption,
           last_updated: plug.updated_at,
-          note: 'Real-time data unavailable, showing cached status'
+          note: 'Cached status from database'
         }
       });
     }
@@ -394,32 +378,30 @@ const getPowerConsumption = async (req, res) => {
 
     const plug = plugs[0];
 
-    try {
-      // Call smart plug API to get consumption data
-      const response = await axios.get(`${process.env.PLUG_API_URL}/consumption/${plug.plug_id}`, {
-        params: { period: period || 'day' },
-        headers: {
-          'Authorization': `Bearer ${process.env.PLUG_API_KEY}`
-        },
-        timeout: 10000
-      });
+    // Simulate power consumption data (replace with actual smart plug API)
+    const generateConsumptionData = (period) => {
+      const data = [];
+      const points = period === 'hour' ? 60 : period === 'day' ? 24 : period === 'week' ? 7 : 30;
+      
+      for (let i = 0; i < points; i++) {
+        data.push({
+          timestamp: new Date(Date.now() - (points - i) * (period === 'hour' ? 60000 : period === 'day' ? 3600000 : 86400000)),
+          consumption: plug.power_state === 'on' ? Math.floor(Math.random() * 50) + 100 : 0
+        });
+      }
+      return data;
+    };
 
-      res.json({
-        success: true,
-        data: {
-          plug_id: plug.plug_id,
-          name: plug.name,
-          period: period || 'day',
-          consumption_data: response.data
-        }
-      });
-    } catch (apiError) {
-      res.status(400).json({
-        success: false,
-        message: 'Failed to fetch power consumption data',
-        error: apiError.response?.data?.message || apiError.message
-      });
-    }
+    res.json({
+      success: true,
+      data: {
+        plug_id: plug.plug_id,
+        name: plug.name,
+        period: period || 'day',
+        consumption_data: generateConsumptionData(period || 'day'),
+        simulation: true
+      }
+    });
   } catch (error) {
     console.error('Get power consumption error:', error);
     res.status(500).json({
@@ -469,19 +451,8 @@ const bulkControlPlugs = async (req, res) => {
 
         const plug = plugs[0];
 
-        // Call smart plug API
-        const response = await axios.post(`${process.env.PLUG_API_URL}/control`, {
-          plug_id: plug.plug_id,
-          ip_address: plug.ip_address,
-          mac_address: plug.mac_address,
-          action: action
-        }, {
-          headers: {
-            'Authorization': `Bearer ${process.env.PLUG_API_KEY}`,
-            'Content-Type': 'application/json'
-          },
-          timeout: 5000
-        });
+        // Simulate smart plug API call
+        await new Promise(resolve => setTimeout(resolve, 200));
 
         // Update plug status in database
         await db.execute(
@@ -492,8 +463,8 @@ const bulkControlPlugs = async (req, res) => {
         results.push({
           plug_id: plugId,
           success: true,
-          message: `Smart plug turned ${action} successfully`,
-          response: response.data
+          message: `Smart plug turned ${action} successfully (simulated)`,
+          simulation: true
         });
       } catch (error) {
         results.push({

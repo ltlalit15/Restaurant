@@ -1,5 +1,5 @@
 const db = require('../config/database');
-const axios = require('axios');
+// const axios = require('axios'); // Uncomment when you have actual printer API endpoints
 
 // Get all printers
 const getAllPrinters = async (req, res) => {
@@ -181,21 +181,11 @@ const testPrinter = async (req, res) => {
 
     const printer = printers[0];
 
-    // Call printer API to test print
+    // Simulate printer test (replace with actual printer API call)
     try {
-      const response = await axios.post(`${process.env.PRINTER_API_URL}/test`, {
-        printer_id: printer.printer_id,
-        ip_address: printer.ip_address,
-        port: printer.port,
-        type: printer.type
-      }, {
-        headers: {
-          'Authorization': `Bearer ${process.env.PRINTER_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        timeout: 10000
-      });
-
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       // Update printer status to online if test successful
       await db.execute(
         'UPDATE printers SET status = "online", updated_at = CURRENT_TIMESTAMP WHERE id = ?',
@@ -204,13 +194,13 @@ const testPrinter = async (req, res) => {
 
       res.json({
         success: true,
-        message: 'Test print sent successfully',
+        message: 'Test print sent successfully (simulated)',
         data: { 
           printer_id: printer.printer_id,
-          response: response.data
+          status: 'Test completed'
         }
       });
-    } catch (apiError) {
+    } catch (error) {
       // Update printer status to error
       await db.execute(
         'UPDATE printers SET status = "error", updated_at = CURRENT_TIMESTAMP WHERE id = ?',
@@ -220,7 +210,7 @@ const testPrinter = async (req, res) => {
       res.status(400).json({
         success: false,
         message: 'Printer test failed',
-        error: apiError.response?.data?.message || apiError.message
+        error: error.message
       });
     }
   } catch (error) {
@@ -277,57 +267,43 @@ const printOrder = async (req, res) => {
 
     // Send to each printer
     for (const [printerId, printerItems] of Object.entries(printerGroups)) {
-      try {
-        // Get printer details
-        const [printers] = await db.execute(
-          'SELECT * FROM printers WHERE printer_id = ? AND status = "online"',
-          [printerId]
-        );
+      // Get printer details
+      const [printers] = await db.execute(
+        'SELECT * FROM printers WHERE printer_id = ? AND status = "online"',
+        [printerId]
+      );
 
-        if (printers.length === 0) {
-          printResults.push({
-            printer_id: printerId,
-            success: false,
-            message: 'Printer not found or offline'
-          });
-          continue;
-        }
-
-        const printer = printers[0];
-
-        // Call printer API
-        const response = await axios.post(`${process.env.PRINTER_API_URL}/print-kot`, {
-          printer_id: printer.printer_id,
-          ip_address: printer.ip_address,
-          port: printer.port,
-          order: {
-            order_number: order.order_number,
-            table_number: order.table_number,
-            table_name: order.table_name,
-            customer_name: order.customer_name,
-            items: printerItems,
-            created_at: order.created_at
-          }
-        }, {
-          headers: {
-            'Authorization': `Bearer ${process.env.PRINTER_API_KEY}`,
-            'Content-Type': 'application/json'
-          },
-          timeout: 10000
+      if (printers.length === 0) {
+        printResults.push({
+          printer_id: printerId,
+          success: false,
+          message: 'Printer not found or offline'
         });
+        continue;
+      }
 
+      const printer = printers[0];
+
+      // Simulate printer API call (replace with actual API)
+      try {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
         printResults.push({
           printer_id: printerId,
           success: true,
-          message: 'KOT printed successfully',
-          response: response.data
+          message: 'KOT printed successfully (simulated)',
+          order_data: {
+            order_number: order.order_number,
+            table_number: order.table_number,
+            items: printerItems.length
+          }
         });
-      } catch (apiError) {
+      } catch (error) {
         printResults.push({
           printer_id: printerId,
           success: false,
           message: 'Print failed',
-          error: apiError.response?.data?.message || apiError.message
+          error: error.message
         });
       }
     }
@@ -399,47 +375,28 @@ const printReceipt = async (req, res) => {
 
     const printer = printers[0];
 
+    // Simulate receipt printing (replace with actual printer API)
     try {
-      // Call printer API for receipt
-      const response = await axios.post(`${process.env.PRINTER_API_URL}/print-receipt`, {
-        printer_id: printer.printer_id,
-        ip_address: printer.ip_address,
-        port: printer.port,
-        receipt: {
-          session_id: session.session_id,
-          table_number: session.table_number,
-          table_name: session.table_name,
-          customer_name: session.customer_name,
-          start_time: session.start_time,
-          end_time: session.end_time,
-          duration_minutes: session.duration_minutes,
-          session_cost: session.session_cost,
-          orders: orders,
-          payment_details: payment_details,
-          total_amount: payment_details.total_amount
-        }
-      }, {
-        headers: {
-          'Authorization': `Bearer ${process.env.PRINTER_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        timeout: 10000
-      });
-
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       res.json({
         success: true,
-        message: 'Receipt printed successfully',
+        message: 'Receipt printed successfully (simulated)',
         data: { 
           session_id,
           printer_id: printer.printer_id,
-          response: response.data
+          receipt_data: {
+            table: session.table_number,
+            customer: session.customer_name,
+            total: payment_details.total_amount
+          }
         }
       });
-    } catch (apiError) {
+    } catch (error) {
       res.status(400).json({
         success: false,
         message: 'Receipt print failed',
-        error: apiError.response?.data?.message || apiError.message
+        error: error.message
       });
     }
   } catch (error) {

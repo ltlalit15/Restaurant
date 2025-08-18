@@ -820,6 +820,7 @@ import './OrderManagement.css';
 import TableManagement from './TableManagement';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
+import { Modal, Button } from 'react-bootstrap';
 
 const OrdersManagement = () => {
   // State management
@@ -828,6 +829,7 @@ const OrdersManagement = () => {
   const [selectedCategory, setSelectedCategory] = useState('food');
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
+   const [showTableModal, setShowTableModal] = useState(false);
   const [customerInfo, setCustomerInfo] = useState({
     name: '',
     phone: '',
@@ -982,7 +984,10 @@ const OrdersManagement = () => {
   // Function to handle table selection from TableManagement
   const handleTableSelect = (tableNumber) => {
     setSelectedTable(tableNumber);
-    setActiveTab('register'); // Switch to register tab after selecting table
+    setActiveTab('register'); 
+    setShowTableModal(false); // Close the table selection modal
+    
+    // Switch to register tab after selecting table
   };
 
   // Function to handle order selection
@@ -1238,10 +1243,31 @@ const OrdersManagement = () => {
                       orderType === 'takeOut' ? 'btn-success' : 'btn-purple'
                       }`}
                   >
-                    <i className={`fa ${orderType === 'dineIn' ? 'fa-cutlery' :
-                      orderType === 'takeOut' ? 'fa-shopping-bag' : 'fa-motorcycle'
-                      } me-2 small`}></i>
-                    {orderType === 'dineIn' ? 'Dine In' : orderType === 'takeOut' ? 'Take Out' : 'Delivery'}
+                    <span
+  onClick={() => {
+    if (orderType === "dineIn" && orderItems.length > 0 && !selectedTable) {
+      setShowTableModal(true);
+    }
+  }}
+  style={{ cursor: "pointer" }}
+>
+  <i
+    className={`fa ${
+      orderType === "dineIn"
+        ? "fa-cutlery"
+        : orderType === "takeOut"
+        ? "fa-shopping-bag"
+        : "fa-motorcycle"
+    } me-2 small`}
+  ></i>
+
+  {orderType === "dineIn"
+    ? "Dine In"
+    : orderType === "takeOut"
+    ? "Take Out"
+    : "Delivery"}
+</span>
+
                   </button>
 
                   <div className="dropdown">
@@ -1357,36 +1383,50 @@ const OrdersManagement = () => {
               <div className="flex-grow-1 p-3 overflow-auto">
   <div className="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
     {filteredProducts.map((product) => (
-      <div key={product.id} className="col">
-        <div className="card h-100 cursor-pointer hover-shadow border-0">
-          <div className="card-body text-center d-flex flex-column justify-content-center">
-            <h5 className="card-title mb-1">{product.name}</h5>
-            <p className="h5 text-warning mb-0">${product.price.toFixed(2)}</p>
-            <p className="small text-muted mt-1">
-              <i className="fa fa-plus-circle mr-1"></i>
-              Select options
-            </p>
-
-            {/* ✅ Conditional rendering based on selectedTable */}
-            {selectedTable ? (
-              <button
-                className="btn btn-primary mt-2"
-                onClick={() => addToOrder(product)}
-              >
-                Add to Order
-              </button>
-            ) : (
-              <span className="text-muted mt-2">Select a table</span>
-            )}
-          </div>
-        </div>
-      </div>
-    ))}
+                    <div
+                      key={product.id}
+                      onClick={() => addToOrder(product)}
+                      className="col"
+                    >
+                      <div className="card h-100 cursor-pointer hover-shadow border-0">
+                        <div className="card-body text-center d-flex flex-column justify-content-center">
+                          <h5 className="card-title mb-1">{product.name}</h5>
+                          <p className="h5 text-warning mb-0">${product.price.toFixed(2)}</p>
+                          <p className="small text-muted mt-1">
+                            <i className="fa fa-plus-circle mr-1"></i>
+                            Select options
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
   </div>
 </div>
             </div>
           </div>
         )}
+
+
+
+ <Modal show={showTableModal} onHide={() => setShowTableModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Select a Table</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="d-flex flex-wrap gap-2">
+            {["T1", "T2", "T3", "T4", "T5"].map((table) => (
+              <Button
+                key={table}
+                variant="outline-dark"
+                className="flex-grow-1"
+                onClick={() => handleTableSelect(table)}
+              >
+                {table}
+              </Button>
+            ))}
+          </div>
+        </Modal.Body>
+      </Modal>
 
         {/* Tables Screen */}
         {activeTab === 'tables' && (
@@ -1641,6 +1681,8 @@ const OrdersManagement = () => {
                       </button>
                     </div>
                   ))}
+
+                 
                 </div>
               </div>
               <div className="modal-footer">

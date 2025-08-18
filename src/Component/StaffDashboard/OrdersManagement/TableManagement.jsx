@@ -111,19 +111,20 @@ const TableManagement = ({ onJumpToOrders, onSelectTable }) => {
           <div className="kitchen-area">
             <div className="kitchen-equipment fw-bold text-dark">
               KITCHEN
-              <div className="tab-container mt-2">
-                <div className="d-flex flex-column gap-2">
-                  {categories.map((tab) => (
-                    <button
-                      key={tab}
-                      className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
-                      onClick={() => setActiveTab(tab)}
-                    >
-                      {tab}
-                    </button>
-                  ))}
-                </div>
-              </div>
+             <div className="tab-container mt-2">
+  <ul className="category-list">
+    {categories.map((tab) => (
+      <li
+        key={tab}
+        className={`category-item ${activeTab === tab ? 'active' : ''}`}
+        onClick={() => setActiveTab(tab)}
+      >
+        {tab}
+      </li>
+    ))}
+  </ul>
+</div>
+
             </div>
             <div className="kitchen-storage fw-bold text-dark">KITCHEN STORAGE</div>
           </div>

@@ -5,12 +5,11 @@ dotenv.config();
 
 // Create connection pool
 const pool = mysql.createPool({
-
-  host: "localhost",     // 👈 Localhost for local MySQL
-  port: 3306,            // 👈 Default MySQL port
-  user: "root",          // 👈 Your local MySQL username
-  password: "",          // 👈 Or your local MySQL password
-  database: "pos_restaurant_pool",                // Database Name
+  host: "mainline.proxy.rlwy.net",   // Railway host
+  user: "root",                      // Railway user
+  password: "KAErjQuChBKKFuEOJVoEJtMmGizbsjFY",  // Railway password
+  database: "railway",               // Railway DB name
+  port: 42087,                       // Railway port
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -36,6 +35,3 @@ const testConnection = async () => {
 testConnection();
 
 module.exports = promisePool;
-
-
-

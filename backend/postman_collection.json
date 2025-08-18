@@ -1,0 +1,1425 @@
+{
+  "info": {
+    "name": "POS Restaurant & Pool System API",
+    "description": "Complete API collection for POS Restaurant and Pool System with authentication, table management, orders, reservations, billing, and more.",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{auth_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000/api",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\",\n  \"phone\": \"+1234567890\",\n  \"role\": \"user\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('auth_token', response.data.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/profile",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Updated\",\n  \"phone\": \"+1234567891\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/profile",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"password123\",\n  \"newPassword\": \"newpassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/change-password",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "change-password"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users?page=1&limit=10&role=user",
+              "host": ["{{base_url}}"],
+              "path": ["users"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "role",
+                  "value": "user"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/1",
+              "host": ["{{base_url}}"],
+              "path": ["users", "1"]
+            }
+          }
+        },
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Staff Member\",\n  \"email\": \"staff@example.com\",\n  \"password\": \"staff123\",\n  \"phone\": \"+1234567892\",\n  \"role\": \"staff\",\n  \"discount_percentage\": 10\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": ["{{base_url}}"],
+              "path": ["users"]
+            }
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Staff\",\n  \"email\": \"staff@example.com\",\n  \"phone\": \"+1234567893\",\n  \"role\": \"staff\",\n  \"status\": \"active\",\n  \"discount_percentage\": 15\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/2",
+              "host": ["{{base_url}}"],
+              "path": ["users", "2"]
+            }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/2",
+              "host": ["{{base_url}}"],
+              "path": ["users", "2"]
+            }
+          }
+        },
+        {
+          "name": "Get User Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/stats/overview",
+              "host": ["{{base_url}}"],
+              "path": ["users", "stats", "overview"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tables",
+      "item": [
+        {
+          "name": "Get All Tables",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/tables?type=pool&status=available",
+              "host": ["{{base_url}}"],
+              "path": ["tables"],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "pool"
+                },
+                {
+                  "key": "status",
+                  "value": "available"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Available Tables",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/tables/available?type=restaurant&date=2025-01-20&time=14:00",
+              "host": ["{{base_url}}"],
+              "path": ["tables", "available"],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "restaurant"
+                },
+                {
+                  "key": "date",
+                  "value": "2025-01-20"
+                },
+                {
+                  "key": "time",
+                  "value": "14:00"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Table by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/tables/1",
+              "host": ["{{base_url}}"],
+              "path": ["tables", "1"]
+            }
+          }
+        },
+        {
+          "name": "Create Table",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"table_number\": \"P03\",\n  \"table_name\": \"Pool Table 3\",\n  \"table_type\": \"pool\",\n  \"group_id\": 2,\n  \"capacity\": 4,\n  \"hourly_rate\": 12.00,\n  \"location\": \"Gaming Zone\",\n  \"plug_id\": \"PLUG_003\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/tables",
+              "host": ["{{base_url}}"],
+              "path": ["tables"]
+            }
+          }
+        },
+        {
+          "name": "Update Table",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"table_number\": \"P03\",\n  \"table_name\": \"Pool Table 3 Updated\",\n  \"table_type\": \"pool\",\n  \"group_id\": 2,\n  \"capacity\": 6,\n  \"hourly_rate\": 15.00,\n  \"status\": \"available\",\n  \"location\": \"Gaming Zone - Section A\",\n  \"plug_id\": \"PLUG_003\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/tables/1",
+              "host": ["{{base_url}}"],
+              "path": ["tables", "1"]
+            }
+          }
+        },
+        {
+          "name": "Update Table Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"occupied\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/tables/1/status",
+              "host": ["{{base_url}}"],
+              "path": ["tables", "1", "status"]
+            }
+          }
+        },
+        {
+          "name": "Get Table Groups",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/tables/groups/all",
+              "host": ["{{base_url}}"],
+              "path": ["tables", "groups", "all"]
+            }
+          }
+        },
+        {
+          "name": "Create Table Group",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Outdoor Area\",\n  \"description\": \"Outdoor seating and gaming area\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/tables/groups",
+              "host": ["{{base_url}}"],
+              "path": ["tables", "groups"]
+            }
+          }
+        },
+        {
+          "name": "Get Table Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/tables/stats",
+              "host": ["{{base_url}}"],
+              "path": ["tables", "stats"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Menu",
+      "item": [
+        {
+          "name": "Get All Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/menu/categories",
+              "host": ["{{base_url}}"],
+              "path": ["menu", "categories"]
+            }
+          }
+        },
+        {
+          "name": "Get All Menu Items",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/menu/items?category_id=1&status=available",
+              "host": ["{{base_url}}"],
+              "path": ["menu", "items"],
+              "query": [
+                {
+                  "key": "category_id",
+                  "value": "1"
+                },
+                {
+                  "key": "status",
+                  "value": "available"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Items by Category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/menu/categories/1/items",
+              "host": ["{{base_url}}"],
+              "path": ["menu", "categories", "1", "items"]
+            }
+          }
+        },
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Desserts\",\n  \"description\": \"Sweet treats and desserts\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/menu/categories",
+              "host": ["{{base_url}}"],
+              "path": ["menu", "categories"]
+            }
+          }
+        },
+        {
+          "name": "Create Menu Item",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Chocolate Cake\",\n  \"description\": \"Rich chocolate cake with cream\",\n  \"category_id\": 6,\n  \"price\": 8.99,\n  \"cost_price\": 4.50,\n  \"printer_id\": \"KITCHEN_01\",\n  \"image_url\": \"https://example.com/chocolate-cake.jpg\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/menu/items",
+              "host": ["{{base_url}}"],
+              "path": ["menu", "items"]
+            }
+          }
+        },
+        {
+          "name": "Update Menu Item",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Premium Chocolate Cake\",\n  \"description\": \"Premium chocolate cake with whipped cream\",\n  \"category_id\": 6,\n  \"price\": 12.99,\n  \"cost_price\": 6.00,\n  \"status\": \"available\",\n  \"printer_id\": \"KITCHEN_01\",\n  \"image_url\": \"https://example.com/premium-chocolate-cake.jpg\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/menu/items/9",
+              "host": ["{{base_url}}"],
+              "path": ["menu", "items", "9"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Get All Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/orders?page=1&limit=10&status=pending&table_id=1",
+              "host": ["{{base_url}}"],
+              "path": ["orders"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "status",
+                  "value": "pending"
+                },
+                {
+                  "key": "table_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Pending Orders (KOT)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/orders/pending",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "pending"]
+            }
+          }
+        },
+        {
+          "name": "Create Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"session_id\": 1,\n  \"table_id\": 1,\n  \"customer_name\": \"John Doe\",\n  \"order_type\": \"dine_in\",\n  \"special_instructions\": \"No onions please\",\n  \"items\": [\n    {\n      \"menu_item_id\": 1,\n      \"quantity\": 2,\n      \"special_instructions\": \"Extra cheese\"\n    },\n    {\n      \"menu_item_id\": 5,\n      \"quantity\": 1\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/orders",
+              "host": ["{{base_url}}"],
+              "path": ["orders"]
+            }
+          }
+        },
+        {
+          "name": "Update Order Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"preparing\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/orders/1/status",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "1", "status"]
+            }
+          }
+        },
+        {
+          "name": "Update Order Item Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ready\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/orders/items/1/status",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "items", "1", "status"]
+            }
+          }
+        },
+        {
+          "name": "Get Orders by Table",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/orders/table/1",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "table", "1"]
+            }
+          }
+        },
+        {
+          "name": "Get Orders by Session",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/orders/session/1",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "session", "1"]
+            }
+          }
+        },
+        {
+          "name": "Get Order Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/orders/stats?date=2025-01-20",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "stats"],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2025-01-20"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sessions",
+      "item": [
+        {
+          "name": "Get All Sessions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/sessions?page=1&limit=10&status=active&table_id=1",
+              "host": ["{{base_url}}"],
+              "path": ["sessions"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "status",
+                  "value": "active"
+                },
+                {
+                  "key": "table_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Active Sessions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/sessions/active",
+              "host": ["{{base_url}}"],
+              "path": ["sessions", "active"]
+            }
+          }
+        },
+        {
+          "name": "Get My Sessions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/sessions/my-sessions",
+              "host": ["{{base_url}}"],
+              "path": ["sessions", "my-sessions"]
+            }
+          }
+        },
+        {
+          "name": "Start Session",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"table_id\": 1,\n  \"customer_name\": \"John Doe\",\n  \"customer_phone\": \"+1234567890\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/sessions/start",
+              "host": ["{{base_url}}"],
+              "path": ["sessions", "start"]
+            }
+          }
+        },
+        {
+          "name": "End Session",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/sessions/1/end",
+              "host": ["{{base_url}}"],
+              "path": ["sessions", "1", "end"]
+            }
+          }
+        },
+        {
+          "name": "Pause Session",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/sessions/1/pause",
+              "host": ["{{base_url}}"],
+              "path": ["sessions", "1", "pause"]
+            }
+          }
+        },
+        {
+          "name": "Resume Session",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/sessions/1/resume",
+              "host": ["{{base_url}}"],
+              "path": ["sessions", "1", "resume"]
+            }
+          }
+        },
+        {
+          "name": "Extend Session",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"extend_minutes\": 30\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/sessions/1/extend",
+              "host": ["{{base_url}}"],
+              "path": ["sessions", "1", "extend"]
+            }
+          }
+        },
+        {
+          "name": "Get Session Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/sessions/stats/overview?date=2025-01-20",
+              "host": ["{{base_url}}"],
+              "path": ["sessions", "stats", "overview"],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2025-01-20"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reservations",
+      "item": [
+        {
+          "name": "Get All Reservations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/reservations?page=1&limit=10&status=confirmed&date=2025-01-20",
+              "host": ["{{base_url}}"],
+              "path": ["reservations"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "status",
+                  "value": "confirmed"
+                },
+                {
+                  "key": "date",
+                  "value": "2025-01-20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get My Reservations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/reservations/my-reservations",
+              "host": ["{{base_url}}"],
+              "path": ["reservations", "my-reservations"]
+            }
+          }
+        },
+        {
+          "name": "Create Reservation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"table_id\": 1,\n  \"customer_name\": \"Jane Smith\",\n  \"customer_phone\": \"+1234567891\",\n  \"customer_email\": \"jane@example.com\",\n  \"reservation_date\": \"2025-01-21\",\n  \"reservation_time\": \"18:00\",\n  \"duration_hours\": 2,\n  \"party_size\": 4,\n  \"special_requests\": \"Window seat preferred\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/reservations",
+              "host": ["{{base_url}}"],
+              "path": ["reservations"]
+            }
+          }
+        },
+        {
+          "name": "Update Reservation",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"table_id\": 1,\n  \"customer_name\": \"Jane Smith Updated\",\n  \"customer_phone\": \"+1234567891\",\n  \"customer_email\": \"jane.updated@example.com\",\n  \"reservation_date\": \"2025-01-21\",\n  \"reservation_time\": \"19:00\",\n  \"duration_hours\": 3,\n  \"party_size\": 6,\n  \"special_requests\": \"Corner table preferred\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/reservations/1",
+              "host": ["{{base_url}}"],
+              "path": ["reservations", "1"]
+            }
+          }
+        },
+        
+        {
+          "name": "Update Reservation Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"arrived\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/reservations/1/status",
+              "host": ["{{base_url}}"],
+              "path": ["reservations", "1", "status"]
+            }
+          }
+        },
+        {
+          "name": "Cancel Reservation",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/reservations/1/cancel",
+              "host": ["{{base_url}}"],
+              "path": ["reservations", "1", "cancel"]
+            }
+          }
+        },
+        {
+          "name": "Get Reservation Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/reservations/stats/overview?date=2025-01-20",
+              "host": ["{{base_url}}"],
+              "path": ["reservations", "stats", "overview"],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2025-01-20"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Smart Plugs",
+      "item": [
+        {
+          "name": "Get All Plugs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/plugs",
+              "host": ["{{base_url}}"],
+              "path": ["plugs"]
+            }
+          }
+        },
+        {
+          "name": "Create Smart Plug",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plug_id\": \"PLUG_004\",\n  \"name\": \"PlayStation 3 Plug\",\n  \"table_id\": 7,\n  \"ip_address\": \"192.168.1.104\",\n  \"mac_address\": \"AA:BB:CC:DD:EE:F4\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/plugs",
+              "host": ["{{base_url}}"],
+              "path": ["plugs"]
+            }
+          }
+        },
+        {
+          "name": "Control Plug Power",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"on\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/plugs/1/power",
+              "host": ["{{base_url}}"],
+              "path": ["plugs", "1", "power"]
+            }
+          }
+        },
+        {
+          "name": "Get Plug Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/plugs/1/status",
+              "host": ["{{base_url}}"],
+              "path": ["plugs", "1", "status"]
+            }
+          }
+        },
+        {
+          "name": "Get Power Consumption",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/plugs/1/consumption?period=day",
+              "host": ["{{base_url}}"],
+              "path": ["plugs", "1", "consumption"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "day"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Bulk Control Plugs",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plug_ids\": [1, 2, 3],\n  \"action\": \"off\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/plugs/bulk/control",
+              "host": ["{{base_url}}"],
+              "path": ["plugs", "bulk", "control"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Printers",
+      "item": [
+        {
+          "name": "Get All Printers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/printers",
+              "host": ["{{base_url}}"],
+              "path": ["printers"]
+            }
+          }
+        },
+        {
+          "name": "Create Printer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"printer_id\": \"KITCHEN_02\",\n  \"name\": \"Kitchen Printer 2\",\n  \"type\": \"kitchen\",\n  \"ip_address\": \"192.168.1.102\",\n  \"port\": 9100\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/printers",
+              "host": ["{{base_url}}"],
+              "path": ["printers"]
+            }
+          }
+        },
+        {
+          "name": "Test Printer",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/printers/1/test",
+              "host": ["{{base_url}}"],
+              "path": ["printers", "1", "test"]
+            }
+          }
+        },
+        {
+          "name": "Print Order (KOT)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"order_id\": 1,\n  \"printer_type\": \"kitchen\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/printers/print-order",
+              "host": ["{{base_url}}"],
+              "path": ["printers", "print-order"]
+            }
+          }
+        },
+        {
+          "name": "Print Receipt",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"session_id\": 1,\n  \"payment_details\": {\n    \"total_amount\": 45.50,\n    \"payment_method\": \"cash\",\n    \"payment_id\": \"PAY-123456\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/printers/print-receipt",
+              "host": ["{{base_url}}"],
+              "path": ["printers", "print-receipt"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Billing & Payments",
+      "item": [
+        {
+          "name": "Get Session Bill",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/billing/session/1",
+              "host": ["{{base_url}}"],
+              "path": ["billing", "session", "1"]
+            }
+          }
+        },
+        {
+          "name": "Process Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"session_id\": 1,\n  \"amount\": 45.50,\n  \"payment_method\": \"cash\",\n  \"transaction_id\": \"TXN_123456789\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/billing/payment",
+              "host": ["{{base_url}}"],
+              "path": ["billing", "payment"]
+            }
+          }
+        },
+        {
+          "name": "Get Payment History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/billing/payments?page=1&limit=10&payment_method=cash&date=2025-01-20",
+              "host": ["{{base_url}}"],
+              "path": ["billing", "payments"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "payment_method",
+                  "value": "cash"
+                },
+                {
+                  "key": "date",
+                  "value": "2025-01-20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get My Payments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/billing/my-payments",
+              "host": ["{{base_url}}"],
+              "path": ["billing", "my-payments"]
+            }
+          }
+        },
+        {
+          "name": "Refund Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refund_reason\": \"Customer complaint\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/billing/payments/1/refund",
+              "host": ["{{base_url}}"],
+              "path": ["billing", "payments", "1", "refund"]
+            }
+          }
+        },
+        {
+          "name": "Get Billing Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/billing/stats?date=2025-01-20",
+              "host": ["{{base_url}}"],
+              "path": ["billing", "stats"],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2025-01-20"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "Get Dashboard Overview",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/reports/dashboard?date=2025-01-20",
+              "host": ["{{base_url}}"],
+              "path": ["reports", "dashboard"],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2025-01-20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Revenue Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/reports/revenue?start_date=2025-01-01&end_date=2025-01-31&group_by=day",
+              "host": ["{{base_url}}"],
+              "path": ["reports", "revenue"],
+              "query": [
+                {
+                  "key": "start_date",
+                  "value": "2025-01-01"
+                },
+                {
+                  "key": "end_date",
+                  "value": "2025-01-31"
+                },
+                {
+                  "key": "group_by",
+                  "value": "day"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Table Utilization Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/reports/table-utilization?start_date=2025-01-01&end_date=2025-01-31",
+              "host": ["{{base_url}}"],
+              "path": ["reports", "table-utilization"],
+              "query": [
+                {
+                  "key": "start_date",
+                  "value": "2025-01-01"
+                },
+                {
+                  "key": "end_date",
+                  "value": "2025-01-31"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Export Revenue Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/reports/export/revenue?start_date=2025-01-01&end_date=2025-01-31&format=csv",
+              "host": ["{{base_url}}"],
+              "path": ["reports", "export", "revenue"],
+              "query": [
+                {
+                  "key": "start_date",
+                  "value": "2025-01-01"
+                },
+                {
+                  "key": "end_date",
+                  "value": "2025-01-31"
+                },
+                {
+                  "key": "format",
+                  "value": "csv"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "Server Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
